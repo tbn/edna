@@ -267,3 +267,15 @@ class EDPluginExecProcess(EDPluginExec):
         Returns the string containing the execution status.
         """
         return self.__strExecutionStatus
+
+
+    # the two next methods are there to counter act the parent ones
+    def preProcess(self, _edObject=None):
+        EDPluginExec.preProcess(self, _edObject)
+        if self.getExecutable() == 'oarsub':
+            EDUtilsParallel.semaphoreNbThreadsRelease()
+
+    def finallyProcess(self, _edObject=None):
+        EDPluginExec.finallyProcess(self, _edObject)
+        if self.getExecutable() == 'oarsub':
+            EDUtilsParallel.semaphoreNbThreadsAcquire()
