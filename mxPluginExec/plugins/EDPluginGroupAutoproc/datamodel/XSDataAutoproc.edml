@@ -53,6 +53,9 @@ complex type XSDataXdsOutputFile extends XSDataInput {
 
 complex type XSDataXdsCompletenessEntry {
 	outer_res : XSDataFloat
+	outer_observed : XSDataFloat
+	outer_unique : XSDataFloat
+	outer_possible : XSDataFloat
 	outer_complete : XSDataFloat
 	outer_rfactor : XSDataFloat
 	outer_isig : XSDataFloat
@@ -92,6 +95,7 @@ complex type XSDataXdsOutput extends XSDataResult {
 complex type XSDataResCutoff extends XSDataInput {
 	xds_res : XSDataXdsOutput
 	completeness_entries : XSDataXdsCompletenessEntry []
+	detector_max_res : XSDataFloat optional
 	//XXX: remove from model as it is only pass through?
 	total_completeness : XSDataXdsCompletenessEntry
 	res_override : XSDataFloat optional
@@ -112,19 +116,30 @@ complex type XSDataResCutoffResult extends XSDataResult {
 	total_isig : XSDataFloat
 }
 
-complex type XSDataXscaleInputFile {
+complex type XSDataXscaleInputFile extends XSDataInput {
 	path : XSDataString
 	res : XSDataFloat
 }
 
-complex type XSDataXscaleGeneratedFiles {
-	anom_merged : XSDataString
-	noanom_merged : XSDataString
-	anom_unmerged : XSDataString
-	noanom_unmerged : XSDataString
+complex type XSDataXscaleGeneratedFiles extends XSDataResult {
+	hkl_anom_merged : XSDataString
+	lp_anom_merged : XSDataString
+	stats_anom_merged : XSDataXscaleParsedOutput
+
+	hkl_noanom_merged : XSDataString
+	lp_noanom_merged : XSDataString
+	stats_noanom_merged : XSDataXscaleParsedOutput
+
+	hkl_anom_unmerged : XSDataString
+	lp_anom_unmerged : XSDataString
+	stats_anom_unmerged : XSDataXscaleParsedOutput
+
+	hkl_noanom_unmerged : XSDataString
+	lp_noanom_unmerged : XSDataString
+	stats_noanom_unmerged : XSDataXscaleParsedOutput
 }
 
-complex type XSDataXscaleInput {
+complex type XSDataXscaleInput extends XSDataInput {
 	merge : XSDataBoolean
 	friedels_law : XSDataBoolean
 	xds_files : XSDataXscaleInputFile []
@@ -133,9 +148,23 @@ complex type XSDataXscaleInput {
 	bins : XSDataDouble [] optional
 }
 
-complex type XSDataXscaleOutput {
+complex type XSDataXscaleOutput extends XSDataResult {
 	succeeded : XSDataBoolean
-	output_file : XSDataString optional
+	hkl_file : XSDataString optional
+	lp_file : XSDataString optional
+}
+
+complex type XSDataXscaleParsingInput extends XSDataInput {
+	lp_file : XSDataString
+}
+
+complex type XSDataXscaleCompletenessEntry extends XSDataXdsCompletenessEntry {
+	multiplicity : XSDataFloat
+}
+
+complex type XSDataXscaleParsedOutput extends XSDataResult {
+	total_completeness : XSDataXscaleCompletenessEntry
+	completeness_entries : XSDataXscaleCompletenessEntry []
 }
 
 
@@ -155,12 +184,23 @@ complex type XSDataXdsGenerateOutput extends XSDataResult {
 	hkl_no_anom : XSDataString
 	correct_lp_anom : XSDataString
 	correct_lp_no_anom : XSDataString
+	gxparm : XSDataString
 }
 
-complex type XSDataAutoprocInput extends XSDataInput {
+complex type XSDataAutoprocMasterInput extends XSDataInput {
 	input_file : XSDataFile
-	completeness_cutoff : XSDataFloat optional
 	res_override : XSDataFloat optional
+	//cutoffs
+	completeness_cutoff : XSDataFloat optional
 	isig_cutoff : XSDataFloat optional
+	r_value_cutoff : XSDataFloat optional
+	cc_half_cutoff : XSDataFloat optional
+
 	data_collection_id : XSDataInteger optional
+	detector_max_res : XSDataFloat optional
+	low_resolution_limit : XSDataFloat optional
+}
+
+complex type XSDataAutoprocInput extends XSDataAutoprocMasterInput {
+	output_file : XSDataFile
 }
