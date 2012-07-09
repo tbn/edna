@@ -59,9 +59,22 @@ class EDPluginControlRunXdsFastProc( EDPluginControl ):
         self.first_run = None
         self.second_run = None
         self.third_run = None
+        self.final_run = None
 
         # to hold a ref to the successful plugin
         self.successful_run = None
+
+    def configure(self):
+        EDPluginControl.configure(self)
+
+        # desperate mode means we're going to do a last chance XDS run
+        # including the whole data set for spot picking if the first
+        # three failed
+        self.desperate_mode = False
+        dm = self.getStringConfigurationParameterValue('desperateMode')
+        if dm is not None:
+            self.desperate_mode = True
+
 
     def checkParameters(self):
         """
@@ -92,9 +105,13 @@ class EDPluginControlRunXdsFastProc( EDPluginControl ):
         # we cannot find it in the xds input file
         self.end_image_no = sys.maxint
 
-        data_range = cfg.get('DATA_RANGE=')
-        if data_range is not None:
-            self.end_image_no = data_range[1]
+        self.data_range = cfg.get('DATA_RANGE=')
+        if self.data_range is not None:
+            self.end_image_no = self.data_range[1]
+        else:
+            # We cannot use the data range as a spot range, so
+            # deactivate our desperate mode
+            self.desperate_mode = False
 
     def process(self, _edObject = None):
         EDPluginControl.process(self)
@@ -179,7 +196,31 @@ class EDPluginControlRunXdsFastProc( EDPluginControl ):
                 EDVerbose.DEBUG('... and it failed')
 
         if not self.successful_run:
-        # all runs failed so bail out ...
+            # do we try one last time with the whole data set for spot
+            # picking?
+            if self.desperate_mode:
+                self.DEBUG('DESPERATE MODE: Trying spot picking using the whole dataset')
+                self.final_run = self.loadPlugin(self.controlled_plugin_name)
+
+                params = XSDataMinimalXdsIn()
+                params.input_file = self.dataInput.input_file
+                params.jobs = 'DEFPIX INTEGRATE CORRECT'
+
+                params.spot_range = [self.data_range]
+                self.DEBUG('setting the SPOT_RANGE to {0}'.format(params.spot_range))
+
+                self.final_run.dataInput = params
+                self.final_run.executeSynchronous()
+
+                EDVerbose.DEBUG('final (desperate mode) run completed')
+                if self.final_run.dataOutput is not None and self.final_run.dataOutput.succeeded.value:
+                    EDVerbose.DEBUG('... and it worked')
+                    self.successful_run = self.final_run
+                else:
+                    EDVerbose.DEBUG('... and it failed')
+
+        # if everything failed including the eventual last effort run:
+        if not self.successful_run:
             self.setFailure()
         else:
             # use the xds parser plugin to parse the xds output file...
