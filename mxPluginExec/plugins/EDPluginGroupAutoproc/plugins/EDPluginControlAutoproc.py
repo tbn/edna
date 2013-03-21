@@ -28,6 +28,8 @@ __license__ = "GPLv3+"
 __copyright__ = "ESRF"
 
 
+WS_URL='http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForCollectionWebService?wsdl'
+
 import os.path
 import time
 import sys
@@ -40,6 +42,16 @@ from EDPluginControl import EDPluginControl
 from EDVerbose import EDVerbose
 
 from EDFactoryPlugin import edFactoryPlugin
+
+# try the suds from the system
+try:
+    import suds
+except ImportError:
+    EDVerbose.warning('Suds not installed system wide, will try the EDNA bundled one')
+    edFactoryPlugin.loadModule("EDInstallSudsv0_4")
+
+import suds
+
 
 from XSDataCommon import XSDataFile, XSDataBoolean, XSDataString
 from XSDataCommon import  XSDataInteger, XSDataTime, XSDataFloat
@@ -61,6 +73,14 @@ edFactoryPlugin.loadModule('XSDataISPyBv1_4')
 # plugin input/output
 from XSDataISPyBv1_4 import XSDataInputStoreAutoProc
 from XSDataISPyBv1_4 import XSDataResultStoreAutoProc
+
+# dimple stuff
+
+# this depends on the CCTBX modules so perhaps we could make running
+# dimple dependent on whether those are installed or not
+edFactoryPlugin.loadModule('XSDataCCP4DIMPLE')
+from XSDataCCP4DIMPLE import CCP4DataInputControlPipelineCalcDiffMap
+from XSDataCCP4DIMPLE import HKL, XYZ, CCP4MTZColLabels, CCP4LogFile
 
 # what actually goes inside
 from XSDataISPyBv1_4 import AutoProcContainer, AutoProc, AutoProcScalingContainer
@@ -282,6 +302,8 @@ class EDPluginControlAutoproc(EDPluginControl):
         self.store_autoproc_noanom = self.loadPlugin('EDPluginISPyBStoreAutoProcv1_4')
 
         self.file_conversion = self.loadPlugin('EDPluginControlAutoprocImport')
+
+        self.dimple = self.loadPlugin('EDPluginControlDIMPLEPipelineCalcDiffMap-v1.0')
 
         self.DEBUG('EDPluginControlAutoproc.preProcess finished')
 
@@ -696,6 +718,55 @@ class EDPluginControlAutoproc(EDPluginControl):
             EDVerbose.screen(traceback.format_exc())
 
 
+        # Now onto DIMPLE
+
+        # we need a PDB file either in ispyb or in the image directory
+        c = suds.client.Client(WS_URL)
+        pdb_file = c.service.getPdbFilePath(self.dataInput.data_collection_id.value)
+        if pdb_file is None:
+            EDVerbose.screen('No pdb file in ispyb, trying the toplevel dir {0}'.format(self.root_dir))
+        for f in os.listdir(self.root_dir):
+            if f.endswith('.pdb'):
+                pdb_file = os.path.join(self.root_dir, f)
+                break
+
+        if pdb_file is None:
+            EDVerbose.WARNING('No pdb file found, not running dimple')
+        else:
+            EDVerbose.screen('Using pdb file {0}'.format(pdb_file))
+            dimple_in = CCP4DataInputControlPipelineCalcDiffMap()
+            dimple_in.XYZIN = XYZ(path=XSDataString(pdb_file))
+
+            # We'll put the results in the results directory as well
+            dimple_out = os.path.join(self.results_dir, '{0}_dimple_out.pdb'.format(self.image_prefix))
+            dimple_in.XYZOUT = XYZ(path=XSDataString(dimple_out))
+
+            labels = CCP4MTZColLabels()
+            labels.F = XSDataString('F_xdsproc')
+            labels.SIGF = XSDataString('SIGF_xdsproc')
+            labels.IMEAN = XSDataString('IMEAN')
+            labels.SIGIMEAN = XSDataString('SIGIMEAN')
+            dimple_in.ColLabels = labels
+
+            # For now the import plugin does no give information about
+            # the paths to the various files it generates so we look
+            # into the results directory for the right mtz file
+            mtz_file = None
+            for f in os.listdir(self.results_dir):
+                if f.endswith('anom_aimless.mtz'):
+                    mtz_file = os.path.join(self.results_dir, f)
+                    break
+            if mtz_file is None:
+                EDVerbose.ERROR('No suitable input mtz found for dimple, not running it')
+            else:
+                dimple_in.HKLIN = HKL(XSDataString(mtz_file))
+                dimple_log = os.path.join(self.results_dir, 'dimple.log')
+                dimple_in.HKLOUT = HKL(XSDataString(dimple_log))
+                self.dimple.dataInput = dimple_in
+                self.dimple.executeSynchronous()
+
+
+
     def postProcess(self, _edObject = None):
         EDPluginControl.postProcess(self)
         self.DEBUG("EDPluginControlAutoproc.postProcess")
@@ -834,8 +905,6 @@ class EDPluginControlAutoproc(EDPluginControl):
 
 
         # ------ NO ANOM / ANOM end
-
-
 
         program_container = AutoProcProgramContainer()
         program_container.AutoProcProgram = AutoProcProgram()
