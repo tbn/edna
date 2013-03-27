@@ -305,7 +305,7 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         self.file_conversion = self.loadPlugin('EDPluginControlAutoprocImport')
 
-        self.dimple = self.loadPlugin('EDPluginControlDIMPLEPipelineCalcDiffMapv10.py')
+        self.dimple = self.loadPlugin('EDPluginControlDIMPLEPipelineCalcDiffMapv10')
 
         self.DEBUG('EDPluginControlAutoproc.preProcess finished')
 
