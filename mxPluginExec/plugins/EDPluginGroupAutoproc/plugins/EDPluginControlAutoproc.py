@@ -82,6 +82,8 @@ edFactoryPlugin.loadModule('XSDataCCP4DIMPLE')
 from XSDataCCP4DIMPLE import CCP4DataInputControlPipelineCalcDiffMap
 from XSDataCCP4DIMPLE import HKL, XYZ, CCP4MTZColLabels, CCP4LogFile
 
+edFactoryPlugin.loadModule('EDPluginControlDIMPLEPipelineCalcDiffMap-v1.0')
+
 # what actually goes inside
 from XSDataISPyBv1_4 import AutoProcContainer, AutoProc, AutoProcScalingContainer
 from XSDataISPyBv1_4 import AutoProcScaling, AutoProcScalingStatistics
