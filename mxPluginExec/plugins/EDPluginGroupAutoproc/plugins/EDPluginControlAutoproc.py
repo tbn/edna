@@ -761,9 +761,11 @@ class EDPluginControlAutoproc(EDPluginControl):
             if mtz_file is None:
                 EDVerbose.ERROR('No suitable input mtz found for dimple, not running it')
             else:
-                dimple_in.HKLIN = HKL(XSDataString(mtz_file))
-                dimple_log = os.path.join(self.results_dir, 'dimple.log')
-                dimple_in.HKLOUT = HKL(XSDataString(dimple_log))
+                dimple_in.HKLIN = HKL(path=XSDataString(mtz_file))
+                dimple_log = os.path.join(self.results_dir, '{0}_dimple.log'.format(self.image_prefix))
+                dimple_in.outputLogFile = CCP4LogFile(path=XSDataString(dimple_log))
+                dimple_mtzout = os.path.join(self.results_dir, '{0}_dimple_out.mtz'.format(self.image_prefix))
+                dimple_in.HKLOUT = HKL(path=XSDataString(dimple_mtzout))
                 self.dimple.dataInput = dimple_in
                 self.dimple.executeSynchronous()
 
