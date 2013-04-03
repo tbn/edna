@@ -728,12 +728,13 @@ class EDPluginControlAutoproc(EDPluginControl):
         script_template = '''#!/bin/sh
 
 if [ $# -eq 1 ]; then
-        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py `pwd` $1;
+        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py {root_dir} $1;
 else
-        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py `pwd` {dcid}
+        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py {root_dir} {dcid}
 fi
 '''
-        dimple_script = script_template.format(dcid=self.dataInput.data_collection_id.value)
+        dimple_script = script_template.format(dcid=self.dataInput.data_collection_id.value
+                                               root_dir=self.root_dir)
         script_path = os.path.join(self.root_dir, 'dimple.sh')
         with open(script_path, 'w') as f:
             f.write(dimple_script)
