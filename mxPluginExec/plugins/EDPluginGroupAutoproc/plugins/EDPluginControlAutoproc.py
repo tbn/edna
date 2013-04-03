@@ -37,6 +37,7 @@ import json
 import traceback
 import shutil
 import socket
+from stat import *
 
 from EDPluginControl import EDPluginControl
 from EDVerbose import EDVerbose
@@ -735,8 +736,10 @@ else
 fi
 '''
         dimple_script = script_template.format(dcid=self.dataInput.data_collection_id.value)
-        with open(os.path.join(self.root_dir, 'dimple.sh'), 'w') as f:
+        script_path = os.path.join(self.root_dir, 'dimple.sh')
+        with open(script_path, 'w') as f:
             f.write(dimple_script)
+        os.chmod(script_path, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|S_IXUSR|S_IXGRP|S_IXOTH)
 
 
         # we need a PDB file either in ispyb or in the image directory
