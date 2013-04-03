@@ -727,8 +727,6 @@ class EDPluginControlAutoproc(EDPluginControl):
         # This is ugly
         script_template = '''#!/bin/sh
 
-echo $*
-
 if [ $# -eq 1 ]; then
         ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py `pwd` $1;
 else
