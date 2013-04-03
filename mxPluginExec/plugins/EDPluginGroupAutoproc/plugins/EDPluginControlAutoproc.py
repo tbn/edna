@@ -733,7 +733,7 @@ else
         ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py {root_dir} {dcid}
 fi
 '''
-        dimple_script = script_template.format(dcid=self.dataInput.data_collection_id.value
+        dimple_script = script_template.format(dcid=self.dataInput.data_collection_id.value,
                                                root_dir=self.root_dir)
         script_path = os.path.join(self.root_dir, 'dimple.sh')
         with open(script_path, 'w') as f:
