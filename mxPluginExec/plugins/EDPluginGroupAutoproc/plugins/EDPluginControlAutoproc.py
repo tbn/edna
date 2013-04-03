@@ -722,6 +722,23 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         # Now onto DIMPLE
 
+        # create a startup script
+        # This is ugly
+        script_template = '''#!/bin/sh
+
+echo $*
+
+if [ $# -eq 1 ]; then
+        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py `pwd` $1;
+else
+        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py `pwd` {dcid}
+fi
+'''
+        dimple_script = script_template.format(dcid=self.dataInput.data_collection_id.value)
+        with open(os.path.join(self.root_dir, 'dimple.sh'), 'w') as f:
+            f.write(dimple_script)
+
+
         # we need a PDB file either in ispyb or in the image directory
         c = suds.client.Client(WS_URL)
         pdb_file = c.service.getPdbFilePath(self.dataInput.data_collection_id.value)
