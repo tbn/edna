@@ -30,6 +30,7 @@ __copyright__ = "ESRF"
 
 WS_URL='http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForCollectionWebService?wsdl'
 
+import os
 import os.path
 import time
 import sys
@@ -153,7 +154,11 @@ class EDPluginControlAutoproc(EDPluginControl):
     def preProcess(self, _edObject = None):
         EDPluginControl.preProcess(self)
         self.DEBUG('EDPluginControlAutoproc.preProcess starting')
-        self.DEBUG('failure state is currently {0}'.format(self.isFailure()))
+        self.DEBUG('running on {0}'.format(socket.gethostname()))
+        try:
+            self.DEBUG('system load avg: {0}'.format(os.getloadavg()))
+        except OSError:
+            pass
 
         # for info to send to the autoproc stats server
         self.custom_stats = dict(creation_time=time.time(),
