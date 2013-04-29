@@ -188,7 +188,7 @@ class EDPluginControlAutoproc(EDPluginControl):
         try:
             os.makedirs(self.results_dir)
         except OSError: # it most likely exists
-            pass
+            EDVerbose.ERROR('Error creating the results directory: {0}'.format(traceback.format_exc()))
 
         # Copy the vanilla XDS input file to the results dir
         infile_dest = os.path.join(self.results_dir, self.image_prefix + '_input_XDS.INP')
@@ -200,7 +200,7 @@ class EDPluginControlAutoproc(EDPluginControl):
         try:
             os.makedirs(self.autoproc_ids_dir)
         except OSError: # it's there
-            pass
+            EDVerbose.ERROR('Error creating the autoproc ids directory: {0}'.format(traceback.format_exc()))
 
 
         # we'll need the low res limit later on
