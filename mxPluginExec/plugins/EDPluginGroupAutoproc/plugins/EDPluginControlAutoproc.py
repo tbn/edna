@@ -733,7 +733,7 @@ class EDPluginControlAutoproc(EDPluginControl):
         script_template = '''#!/bin/sh
 
 if [ $# -eq 1 ]; then
-        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py {root_dir} $1;
+        ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py {root_dir} `readlink -f "$1"`;
 else
         ssh mxnice /scisoft/bin/cctbx_python_debian6.sh /scisoft/bin/run-dimple-autoproc.py {root_dir} {dcid}
 fi
