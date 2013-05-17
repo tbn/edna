@@ -793,6 +793,22 @@ fi
                 self.dimple.dataInput = dimple_in
                 self.dimple.executeSynchronous()
 
+        # Now create a coot startup file
+        coot_script = """#!/bin/sh
+if [ ! -e dimple_out.mtz ] || [ ! -e dimple_out.pdb ]; then
+        echo Either dimple_out.mtz or dimple_out.pdb is missing
+        echo Did dimple run?
+        exit 1
+else
+        echo Let\'s run coot
+        coot --pdb dimple_out.pdb --auto dimple_out.mtz --python -c 'difference_map_peaks(2,0,5,5,1,1)'
+fi
+"""
+        script_path = os.path.join(self.results_dir, 'coot.sh')
+        with open(script_path, 'w') as f:
+            f.write(coot_script)
+        os.chmod(script_path, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|S_IXUSR|S_IXGRP|S_IXOTH)
+
 
 
     def postProcess(self, _edObject = None):
