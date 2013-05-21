@@ -800,7 +800,7 @@ if [ ! -e dimple_out.mtz ] || [ ! -e dimple_out.pdb ]; then
         echo Did dimple run?
         exit 1
 else
-        echo Let\'s run coot
+        echo Let\\'s run coot
         coot --pdb dimple_out.pdb --auto dimple_out.mtz --python -c 'difference_map_peaks(2,0,5,5,1,1)'
 fi
 """
