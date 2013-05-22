@@ -756,6 +756,10 @@ fi
                 pdb_file = os.path.join(self.root_dir, f)
                 break
 
+        # We need these 2 variables for the coot script below
+        dimple_out = os.path.join(self.results_dir, '{0}_dimple_out.pdb'.format(self.image_prefix))
+        dimple_mtzout = os.path.join(self.results_dir, '{0}_dimple_out.mtz'.format(self.image_prefix))
+
         if pdb_file is None:
             EDVerbose.WARNING('No pdb file found, not running dimple')
         else:
@@ -764,7 +768,7 @@ fi
             dimple_in.XYZIN = XYZ(path=XSDataString(pdb_file))
 
             # We'll put the results in the results directory as well
-            dimple_out = os.path.join(self.results_dir, '{0}_dimple_out.pdb'.format(self.image_prefix))
+
             dimple_in.XYZOUT = XYZ(path=XSDataString(dimple_out))
 
             labels = CCP4MTZColLabels()
@@ -782,13 +786,14 @@ fi
                 if f.endswith('anom_aimless.mtz'):
                     mtz_file = os.path.join(self.results_dir, f)
                     break
+
+
             if mtz_file is None:
                 EDVerbose.ERROR('No suitable input mtz found for dimple, not running it')
             else:
                 dimple_in.HKLIN = HKL(path=XSDataString(mtz_file))
                 dimple_log = os.path.join(self.results_dir, '{0}_dimple.log'.format(self.image_prefix))
                 dimple_in.outputLogFile = CCP4LogFile(path=XSDataString(dimple_log))
-                dimple_mtzout = os.path.join(self.results_dir, '{0}_dimple_out.mtz'.format(self.image_prefix))
                 dimple_in.HKLOUT = HKL(path=XSDataString(dimple_mtzout))
                 self.dimple.dataInput = dimple_in
                 self.dimple.executeSynchronous()
