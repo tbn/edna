@@ -803,8 +803,8 @@ else
         echo Let\\'s run coot
         coot --pdb {pdb} --auto {mtz} --python -c 'difference_map_peaks(2,0,5,5,1,1)'
 fi
-""".format(pdb=os.path.relpath(dimple_out, start=self.root_dir),
-           mtz=os.path.relpath(dimple_mtzout, start=self.root_dir))
+""".format(pdb=os.path.basename(dimple_out),
+           mtz=os.path.basename(dimple_mtzout))
 
         script_path = os.path.join(self.results_dir, 'coot.sh')
         with open(script_path, 'w') as f:
