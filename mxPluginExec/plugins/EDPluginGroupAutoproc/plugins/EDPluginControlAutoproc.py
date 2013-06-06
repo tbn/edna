@@ -503,8 +503,8 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         # Copy the integrate and xds_ascii files to the results directory (for
         # max)
-        shutil.copy(self.generate.dataOutput.hkl_anom, os.path.join(self.results_dir, 'XDS_ASCII.HKL'))
-        shutil.copy(self.generate.dataOutput.integrate_anom, os.path.join(self.results_dir, 'INTEGRATE.HKL'))
+        shutil.copy(self.generate.dataOutput.hkl_anom.value, os.path.join(self.results_dir, 'XDS_ASCII.HKL'))
+        shutil.copy(self.generate.dataOutput.integrate_anom.value, os.path.join(self.results_dir, 'INTEGRATE.HKL'))
 
 
         # we can now use the xds output parser on the two correct.lp
