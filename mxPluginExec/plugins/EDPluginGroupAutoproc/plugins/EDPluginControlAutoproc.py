@@ -501,6 +501,12 @@ class EDPluginControlAutoproc(EDPluginControl):
                          'Successful',
                          'anom/noanom generation finished in {0}s'.format(self.stats['anom/noanom_generation']))
 
+        # Copy the integrate and xds_ascii files to the results directory (for
+        # max)
+        shutil.copy(self.generate.dataOutput.hkl_anom, os.path.join(self.results_dir, 'XDS_ASCII.HKL'))
+        shutil.copy(self.generate.dataOutput.integrate_anom, os.path.join(self.results_dir, 'INTEGRATE.HKL'))
+
+
         # we can now use the xds output parser on the two correct.lp
         # files, w/ and w/out anom
         parse_anom_input = XSDataXdsOutputFile()
@@ -821,6 +827,11 @@ fi
     def postProcess(self, _edObject = None):
         EDPluginControl.postProcess(self)
         self.DEBUG("EDPluginControlAutoproc.postProcess")
+
+        # Create a file in the results directory to indicate all files have been
+        # populated in it already so Max's code can be aware of that
+        os.mknod(os.path.join(self.results_dir, '.finished'), 0755)
+
 
         #Now that we have executed the whole thing we need to create
         #the suitable ISPyB plugin input and serialize it to the file
