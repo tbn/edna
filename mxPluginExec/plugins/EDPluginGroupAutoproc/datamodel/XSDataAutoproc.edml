@@ -195,6 +195,8 @@ complex type XSDataXdsGenerateOutput extends XSDataResult {
         hkl_no_anom        : XSDataString
         correct_lp_anom    : XSDataString
         correct_lp_no_anom : XSDataString
+        integrate_anom     : XSDataString
+        integrate_noanom   : XSDataString
         gxparm             : XSDataString
 }
 
