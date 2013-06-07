@@ -839,6 +839,10 @@
       <name>EDPluginExecDIMPLECADv10</name>
       <XSParamList>
          <XSParamItem>
+         <name>execProcessScriptSetupCCP4</name>
+         <value>/scisoft/setup_ccp4.sh</value>
+         </XSParamItem>
+         <XSParamItem>
          <name>execProcessScriptShell</name>
          <value>/bin/bash</value>
          </XSParamItem>
