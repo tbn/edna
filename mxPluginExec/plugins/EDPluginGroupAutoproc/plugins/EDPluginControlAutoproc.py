@@ -830,7 +830,10 @@ fi
 
         # Create a file in the results directory to indicate all files have been
         # populated in it already so Max's code can be aware of that
-        os.mknod(os.path.join(self.results_dir, '.finished'), 0755)
+        try:
+            os.mknod(os.path.join(self.results_dir, '.finished'), 0755)
+        except OSError: # file exists
+            pass
 
 
         #Now that we have executed the whole thing we need to create
