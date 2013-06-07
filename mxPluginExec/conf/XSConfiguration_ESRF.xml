@@ -465,7 +465,7 @@
 	</XSParamItem>
 	<XSParamItem>
 	  <name>execProcessScriptExecutable</name>
-	  <value>/opt/pxsoft/xds/vdefault/redhate4-x86_64/xscale_par</value>
+	  <value>/opt/pxsoft/xds/v20120315/redhate4-x86_64/xscale_par</value>
 	</XSParamItem>
 	<XSParamItem>
 	  <name>timeOut</name>
