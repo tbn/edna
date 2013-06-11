@@ -766,6 +766,11 @@ fi
         dimple_out = os.path.join(self.results_dir, '{0}_dimple_out.pdb'.format(self.image_prefix))
         dimple_mtzout = os.path.join(self.results_dir, '{0}_dimple_out.mtz'.format(self.image_prefix))
 
+        # To indicate if dimple ran successfully. Perhaps there's a
+        # way to do it with edplugin's various isStarted, isFailure,
+        # isWhatever
+        dimple_did_run = False
+
         if pdb_file is None:
             EDVerbose.WARNING('No pdb file found, not running dimple')
         else:
@@ -803,9 +808,12 @@ fi
                 dimple_in.HKLOUT = HKL(path=XSDataString(dimple_mtzout))
                 self.dimple.dataInput = dimple_in
                 self.dimple.executeSynchronous()
+                if not self.dimple.isFailure():
+                    dimple_did_run = True
 
-        # Now create a coot startup file
-        coot_script = """#!/bin/sh
+        # Now create a coot startup file, only if dimple ran successfully
+        if dimple_did_run:
+            coot_script = """#!/bin/sh
 if [ ! -e {mtz} ] || [ ! -e {pdb} ]; then
         echo Either {mtz} or {pdb} is missing
         echo Did dimple run?
@@ -817,10 +825,10 @@ fi
 """.format(pdb=os.path.basename(dimple_out),
            mtz=os.path.basename(dimple_mtzout))
 
-        script_path = os.path.join(self.results_dir, 'coot.sh')
-        with open(script_path, 'w') as f:
-            f.write(coot_script)
-        os.chmod(script_path, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|S_IXUSR|S_IXGRP|S_IXOTH)
+            script_path = os.path.join(self.results_dir, 'coot.sh')
+            with open(script_path, 'w') as f:
+                f.write(coot_script)
+            os.chmod(script_path, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|S_IXUSR|S_IXGRP|S_IXOTH)
 
 
 
