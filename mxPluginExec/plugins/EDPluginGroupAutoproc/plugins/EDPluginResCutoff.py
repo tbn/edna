@@ -88,9 +88,9 @@ class EDPluginResCutoff(EDPlugin):
         else:
             isig_cutoff = isig_cutoff_param.value
 
-        cc_half_param = self.dataInput.cc_half_param
+        cc_half_cutoff_param = self.dataInput.cc_half_cutoff
         if cc_half_param is not None:
-            cc_half_cutoff = cc_half_param
+            cc_half_cutoff = cc_half_param_cutoff.value
         else:
             cc_half_cutoff = 0.15
 
