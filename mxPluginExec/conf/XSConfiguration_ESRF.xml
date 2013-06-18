@@ -465,7 +465,7 @@
 	</XSParamItem>
 	<XSParamItem>
 	  <name>execProcessScriptExecutable</name>
-	  <value>/opt/pxsoft/xds/v20120315/redhate4-x86_64/xscale_par</value>
+	  <value>/opt/pxsoft/xds/vdefault/redhate4-x86_64/xscale_par</value>
 	</XSParamItem>
 	<XSParamItem>
 	  <name>timeOut</name>
@@ -812,7 +812,7 @@
          </XSParamItem>
       </XSParamList>
    </XSPluginItem>
-   
+
    <XSPluginItem>
       <name>EDPluginExecDIMPLEREFMACRestrainedRefinementv10</name>
       <XSParamList>
@@ -834,7 +834,7 @@
          </XSParamItem>
       </XSParamList>
    </XSPluginItem>
-   
+
    <XSPluginItem>
       <name>EDPluginExecDIMPLECADv10</name>
       <XSParamList>
@@ -896,11 +896,11 @@
    </XSPluginItem>
 
     <XSPluginItem>
-	<name>EDPluginControlDIMPLERefmacRigidBodyPhaserv10</name>  
+	<name>EDPluginControlDIMPLERefmacRigidBodyPhaserv10</name>
     </XSPluginItem>
 
      <XSPluginItem>
-	<name>EDPluginExecDIMPLECheckValidHKLv10</name>  
+	<name>EDPluginExecDIMPLECheckValidHKLv10</name>
         <XSParamItem>
             <name>execProcessScriptShell</name>
             <value>/bin/bash</value>
@@ -920,7 +920,7 @@
     </XSPluginItem>
 
     <XSPluginItem>
-	<name>EDPluginExecDIMPLECheckValidXYZv10</name>  
+	<name>EDPluginExecDIMPLECheckValidXYZv10</name>
         <XSParamItem>
             <name>execProcessScriptShell</name>
             <value>/bin/bash</value>
@@ -940,7 +940,7 @@
     </XSPluginItem>
 
     <XSPluginItem>
-        <name>EDPluginExecDIMPLEPDBListv10</name>  
+        <name>EDPluginExecDIMPLEPDBListv10</name>
         <XSParamList>
         <XSParamItem>
             <name>execProcessScriptShell</name>
@@ -958,11 +958,11 @@
             <name>execProcessTimeOut</name>
             <value>20000</value>
          </XSParamItem>
-         </XSParamList> 
+         </XSParamList>
     </XSPluginItem>
 
     <XSPluginItem>
-        <name>EDPluginExecDIMPLEPDBListv10</name>  
+        <name>EDPluginExecDIMPLEPDBListv10</name>
         <XSParamList>
         <XSParamItem>
             <name>execProcessScriptShell</name>
@@ -980,11 +980,11 @@
             <name>execProcessTimeOut</name>
             <value>20000</value>
          </XSParamItem>
-         </XSParamList> 
+         </XSParamList>
     </XSPluginItem>
 
     <XSPluginItem>
-	<name>EDPluginControlDIMPLESv10</name>  
+	<name>EDPluginControlDIMPLESv10</name>
     </XSPluginItem>
 
   </XSPluginList>
