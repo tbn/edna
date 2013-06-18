@@ -88,6 +88,12 @@ class EDPluginResCutoff(EDPlugin):
         else:
             isig_cutoff = isig_cutoff_param.value
 
+        cc_half_param = self.dataInput.cc_half_param
+        if cc_half_param is not None:
+            cc_half_cutoff = cc_half_param
+        else:
+            cc_half_cutoff = 0.15
+
         res_override = self.dataInput.res_override
 
         bins = list()
@@ -109,9 +115,11 @@ class EDPluginResCutoff(EDPlugin):
             outer_complete = entry.outer_complete.value
             outer_rfactor = entry.outer_rfactor.value
             outer_isig = entry.outer_isig.value
+            cc_half = entry.half_dataset_correlation.value
 
-            if outer_complete < local_completeness_cutoff or outer_isig < isig_cutoff or \
-                    (res_override is not None and outer_res < res_override.value):
+            #outer_isig < isig_cutoff or \
+            if outer_complete < local_completeness_cutoff or cc_half < cc_half_cutoff or \
+               (res_override is not None and outer_res < res_override.value):
                 if outer_complete < completeness_cutoff:
                     EDVerbose.DEBUG('incomplete data (%s) in this shell' % outer_complete)
                     res = prev_res
