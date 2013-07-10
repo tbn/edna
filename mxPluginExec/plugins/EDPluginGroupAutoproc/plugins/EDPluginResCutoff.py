@@ -140,7 +140,7 @@ class EDPluginResCutoff(EDPlugin):
         # the total values, which are conveniently already parsed in
         # our case
         if len(bins) < 2:
-            EDVerbose.DEBUG("No bins with I/sigma greater than %s" % isig_cutoff)
+            EDVerbose.DEBUG("No bins with CC1/2 greater than %s" % cc_half_cutoff)
             EDVerbose.DEBUG("""something could be wrong, or the completeness could be too low!
 bravais lattice/SG could be incorrect or something more insidious like
 incorrect parameters in XDS.INP like distance, X beam, Y beam, etc.
