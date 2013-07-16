@@ -276,6 +276,11 @@ complex type XSDataFileConversion extends XSDataInput {
 	image_prefix     : XSDataString optional
 }
 
+complex type XSDataFileConversionOut extends XSDataResult {
+	pointless_sgnumber : XSDataInteger
+	pointless_sgstring : XSDataString
+}
+
 complex type XSDataAutoprocImport extends XSDataInput {
 	input_anom		: XSDataString
 	input_noanom		: XSDataString
@@ -289,5 +294,8 @@ complex type XSDataAutoprocImport extends XSDataInput {
 }
 
 complex type XSDataAutoprocImportOut extends XSDataResult {
-	files : XSDataString []
+	files			: XSDataString []
+	// Those two come from the noanom data
+	pointless_sgnumber	: XSDataInteger
+	pointless_sgstring	: XSDataString
 }

@@ -201,5 +201,6 @@ class EDPluginControlFileConversion(EDPluginControl):
         status = XSDataStatus()
         status.isSuccess = XSDataBoolean(os.path.exists(self.uniqueify.dataInput.output_file.value))
         res.status = status
-
+        res.pointless_sgnumber = self.pointless.dataOutput.sgnumber
+        res.pointless_sgstring = self.pointless.dataOutput.sgstr
         self.dataOutput = res
