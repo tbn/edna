@@ -239,13 +239,14 @@ complex type XSDataPointlessOut extends XSDataResult {
 }
 
 complex type XSDataAimless extends XSDataInput {
-        input_file       : XSDataString // intermediate file name
-        output_file      : XSDataString
-        dataCollectionID : XSDataInteger
-        start_image      : XSDataInteger
-        end_image        : XSDataInteger
-        res              : XSDataFloat
-        anom             : XSDataBoolean
+        input_file		: XSDataString // intermediate file name
+        output_file		: XSDataString
+        command_file		: XSDataString
+        dataCollectionID	: XSDataInteger
+        start_image		: XSDataInteger
+        end_image		: XSDataInteger
+        res			: XSDataFloat
+        anom			: XSDataBoolean
 }
 
 complex type XSDataTruncate extends XSDataInput {
