@@ -197,6 +197,15 @@ class EDPluginControlFileConversion(EDPluginControl):
         EDPluginControl.postProcess(self)
         output_file = self.dataInput.output_file.value
 
+        # gzip the pointless multirecord file
+        pointless_out = os.path.join(os.path.dirname(self.dataInput.output_file.value),
+                                     self.pointless_out)
+        try:
+            logging.debug("gzip'ing pointless multirecord file {0}".format(pointless_out))
+            subprocess.call(['gzip', pointless_out])
+        except Exception:
+            logging.debug("gzip'ing the file failed")
+
         res = XSDataFileConversionOut()
         status = XSDataStatus()
         status.isSuccess = XSDataBoolean(os.path.exists(self.uniqueify.dataInput.output_file.value))
