@@ -109,7 +109,7 @@ WAIT_FOR_FRAME_TIMEOUT=240 #max uses 50*5
 # We used to go through the results directory and add all files to the
 # ispyb upload. Now some files should not be uploaded, so we'll
 # discriminate by extension for now
-ISPYB_UPLOAD_EXTENSIONS=['.lp', '.mtz', '.log', '.inp']
+ISPYB_UPLOAD_EXTENSIONS=['.lp', '.mtz', '.log', '.inp', '.mtz.gz']
 
 class EDPluginControlAutoproc(EDPluginControl):
     """
