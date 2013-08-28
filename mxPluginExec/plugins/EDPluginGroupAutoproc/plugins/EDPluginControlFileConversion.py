@@ -33,6 +33,7 @@ import re
 import os.path
 import tempfile
 import shutil
+import traceback
 
 # for the chmod constants
 from stat import *
@@ -204,7 +205,7 @@ class EDPluginControlFileConversion(EDPluginControl):
             self.DEBUG("gzip'ing pointless multirecord file {0}".format(pointless_out))
             subprocess.call(['gzip', pointless_out])
         except Exception:
-            self.DEBUG("gzip'ing the file failed")
+            self.DEBUG("gzip'ing the file failed: {0}".format(traceback.format_exc()))
 
         res = XSDataFileConversionOut()
         status = XSDataStatus()
