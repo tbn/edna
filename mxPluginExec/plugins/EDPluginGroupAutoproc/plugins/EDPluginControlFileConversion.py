@@ -34,6 +34,7 @@ import os.path
 import tempfile
 import shutil
 import traceback
+import subprocess
 
 # for the chmod constants
 from stat import *
