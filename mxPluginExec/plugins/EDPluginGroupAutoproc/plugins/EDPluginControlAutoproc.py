@@ -853,7 +853,7 @@ fi
         autoproc = AutoProc()
 
         # There's also
-        pointless_sg_str = self.file_conversion.dataOutput.pointless_sgstr
+        pointless_sg_str = self.file_conversion.dataOutput.pointless_sgstring
         if pointless_sg_str is not None:
             autoproc.spaceGroup = pointless_sg_str.value
 
