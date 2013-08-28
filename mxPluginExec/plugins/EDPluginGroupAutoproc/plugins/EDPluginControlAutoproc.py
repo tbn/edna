@@ -852,9 +852,12 @@ fi
         # AutoProc attr
         autoproc = AutoProc()
 
+        # There's also
+        pointless_sg_str = self.file_conversion.dataOutput.pointless_sgstr
+        if pointless_sg_str is not None:
+            autoproc.spaceGroup = pointless_sg_str.value
+
         xdsout = self.xds_first.dataOutput
-        if xdsout.sg_number is not None: # and it should not
-            autoproc.spaceGroup = SPACE_GROUP_NAMES[xdsout.sg_number.value]
         autoproc.refinedCell_a = xdsout.cell_a.value
         autoproc.refinedCell_b = xdsout.cell_b.value
         autoproc.refinedCell_c = xdsout.cell_c.value
