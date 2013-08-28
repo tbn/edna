@@ -201,10 +201,10 @@ class EDPluginControlFileConversion(EDPluginControl):
         pointless_out = os.path.join(os.path.dirname(self.dataInput.output_file.value),
                                      self.pointless_out)
         try:
-            logging.debug("gzip'ing pointless multirecord file {0}".format(pointless_out))
+            self.DEBUG("gzip'ing pointless multirecord file {0}".format(pointless_out))
             subprocess.call(['gzip', pointless_out])
         except Exception:
-            logging.debug("gzip'ing the file failed")
+            self.DEBUG("gzip'ing the file failed")
 
         res = XSDataFileConversionOut()
         status = XSDataStatus()
