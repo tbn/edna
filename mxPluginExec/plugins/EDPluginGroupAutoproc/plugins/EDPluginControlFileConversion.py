@@ -215,5 +215,5 @@ class EDPluginControlFileConversion(EDPluginControl):
         res.status = status
         res.pointless_sgnumber = self.pointless.dataOutput.sgnumber
         res.pointless_sgstring = self.pointless.dataOutput.sgstr
-        res.aimless_log = XSDataString(aimless_log)
+        res.aimless_log = XSDataString(self.aimless_log)
         self.dataOutput = res
