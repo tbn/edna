@@ -878,17 +878,17 @@ fi
 
         inner, outer, overall = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
         inner_stats = AutoProcScalingStatistics()
-        for k, v in inner.iteritems:
+        for k, v in inner.iteritems():
             setattr(inner_stats, k, v)
         scaling_container_noanom.AutoProcScalingStatistics.append(inner_stats)
 
         outer_stats = AutoProcScalingStatistics()
-        for k, v in outer.iteritems:
+        for k, v in outer.iteritems():
             setattr(outer_stats, k, v)
         scaling_container_noanom.AutoProcScalingStatistics.append(outer_stats)
 
         overall_stats = AutoProcScalingStatistics()
-        for k, v in overall.iteritems:
+        for k, v in overall.iteritems():
             setattr(overall_stats, k, v)
         scaling_container_noanom.AutoProcScalingStatistics.append(overall_stats)
 
@@ -918,17 +918,17 @@ fi
 
         inner, outer, overall = _parse_aimless(self.file_conversion.dataOutput.aimless_log_anom.value)
         inner_stats = AutoProcScalingStatistics()
-        for k, v in inner.iteritems:
+        for k, v in inner.iteritems():
             setattr(inner_stats, k, v)
         scaling_container_anom.AutoProcScalingStatistics.append(inner_stats)
 
         outer_stats = AutoProcScalingStatistics()
-        for k, v in outer.iteritems:
+        for k, v in outer.iteritems():
             setattr(outer_stats, k, v)
         scaling_container_anom.AutoProcScalingStatistics.append(outer_stats)
 
         overall_stats = AutoProcScalingStatistics()
-        for k, v in overall.iteritems:
+        for k, v in overall.iteritems():
             setattr(overall_stats, k, v)
         scaling_container_anom.AutoProcScalingStatistics.append(overall_stats)
 
