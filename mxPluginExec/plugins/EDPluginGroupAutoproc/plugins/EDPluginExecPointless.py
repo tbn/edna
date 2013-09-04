@@ -93,7 +93,7 @@ class EDPluginExecPointless(EDPluginExecProcessScript):
         if log is not None:
             # we'll apply the regexp to the whole file contents which
             # hopefully won't be that long.
-            m = sgre.match(log)
+            m = sgre.search(log)
             if m is not None:
                 d = m.groupdict()
                 sgnumber = d['sgnumber']
