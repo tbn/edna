@@ -1205,9 +1205,9 @@ UNIT_CELL_PREFIX = 'Average unit cell:' # special case, 6 values
 
 def _parse_aimless(filepath):
     lines = []
-    inner_stats = {}
-    outer_stats = {}
-    overall_stats = {}
+    inner_stats = {'scalingStatisticsType':'innerShell'}
+    outer_stats = {'scalingStatisticsType':'outerShell'}
+    overall_stats = {'scalingStatisticsType':'overall'}
     unit_cell = None
     with open(filepath, 'r') as f:
         lines = f.readlines()
