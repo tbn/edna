@@ -876,7 +876,7 @@ fi
 
         scaling_container_noanom.AutoProcScaling = scaling
 
-        inner, outer, overall = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
+        inner, outer, overall, unit_cell = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
         inner_stats = AutoProcScalingStatistics()
         for k, v in inner.iteritems():
             setattr(inner_stats, k, v)
@@ -900,13 +900,12 @@ fi
         integration_noanom = AutoProcIntegration()
         if self.integration_id_noanom is not None:
             integration_noanom.autoProcIntegrationId = self.integration_id_noanom
-        crystal_stats =  self.parse_xds_noanom.dataOutput
-        integration_noanom.cell_a = crystal_stats.cell_a.value
-        integration_noanom.cell_b = crystal_stats.cell_b.value
-        integration_noanom.cell_c = crystal_stats.cell_c.value
-        integration_noanom.cell_alpha = crystal_stats.cell_alpha.value
-        integration_noanom.cell_beta = crystal_stats.cell_beta.value
-        integration_noanom.cell_gamma = crystal_stats.cell_gamma.value
+        integration_noanom.cell_a = XSDataFloat(unit_cell[0])
+        integration_noanom.cell_b = XSDataFloat(unit_cell[1])
+        integration_noanom.cell_c = XSDataFloat(unit_cell[2])
+        integration_noanom.cell_alpha = XSDataFloat(unit_cell[3])
+        integration_noanom.cell_beta = XSDataFloat(unit_cell[4])
+        integration_noanom.cell_gamma = XSDataFloat(unit_cell[5])
         integration_noanom.anomalous = 0
 
         # done with the integration
@@ -916,7 +915,7 @@ fi
         # ANOM PATH
         scaling_container_anom = AutoProcScalingContainer()
 
-        inner, outer, overall = _parse_aimless(self.file_conversion.dataOutput.aimless_log_anom.value)
+        inner, outer, overall, unit_cell = _parse_aimless(self.file_conversion.dataOutput.aimless_log_anom.value)
         inner_stats = AutoProcScalingStatistics()
         for k, v in inner.iteritems():
             setattr(inner_stats, k, v)
@@ -976,12 +975,12 @@ fi
         crystal_stats =  self.parse_xds_anom.dataOutput
         if self.integration_id_anom is not None:
             integration_anom.autoProcIntegrationId = self.integration_id_anom
-        integration_anom.cell_a = crystal_stats.cell_a.value
-        integration_anom.cell_b = crystal_stats.cell_b.value
-        integration_anom.cell_c = crystal_stats.cell_c.value
-        integration_anom.cell_alpha = crystal_stats.cell_alpha.value
-        integration_anom.cell_beta = crystal_stats.cell_beta.value
-        integration_anom.cell_gamma = crystal_stats.cell_gamma.value
+        integration_anom.cell_a = XSDataFloat(unit_cell[0])
+        integration_anom.cell_b = XSDataFloat(unit_cell[1])
+        integration_anom.cell_c = XSDataFloat(unit_cell[2])
+        integration_anom.cell_alpha = XSDataFloat(unit_cell[3])
+        integration_anom.cell_beta = XSDataFloat(unit_cell[4])
+        integration_anom.cell_gamma = XSDataFloat(unit_cell[5])
         integration_anom.anomalous = 1
 
         # done with the integration
@@ -1202,14 +1201,14 @@ INTERESTING_LINES = {
     'Rmerge  (within I+/I-)': 'rMerge'
 }
 
+UNIT_CELL_PREFIX = 'Average unit cell:' # special case, 6 values
 
-# I won't write one "plugin" for every little bit of functionnality
-# like this function...
 def _parse_aimless(filepath):
     lines = []
-    inner_stats = {'scalingStatisticsType': 'innerShell'}
-    outer_stats = {'scalingStatisticsType': 'outerShell'}
-    overall_stats = {'scalingStatisticsType': 'overall'}
+    inner_stats = {}
+    outer_stats = {}
+    overall_stats = {}
+    unit_cell = None
     with open(filepath, 'r') as f:
         lines = f.readlines()
     started = False
@@ -1225,7 +1224,9 @@ def _parse_aimless(filepath):
                     overall_stats[prop_name] = overall
                     inner_stats[prop_name] = inner
                     outer_stats[prop_name] = outer
-    return inner_stats, outer_stats, overall_stats
+            if line.startswith(UNIT_CELL_PREFIX):
+                unit_cell = map(float, line.split()[-6:])
+    return inner_stats, outer_stats, overall_stats, unit_cell
 
 
 # taken straight from max's code
