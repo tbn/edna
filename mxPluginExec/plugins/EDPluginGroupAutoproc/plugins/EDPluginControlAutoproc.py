@@ -900,12 +900,12 @@ fi
         integration_noanom = AutoProcIntegration()
         if self.integration_id_noanom is not None:
             integration_noanom.autoProcIntegrationId = self.integration_id_noanom
-        integration_noanom.cell_a = XSDataFloat(unit_cell[0])
-        integration_noanom.cell_b = XSDataFloat(unit_cell[1])
-        integration_noanom.cell_c = XSDataFloat(unit_cell[2])
-        integration_noanom.cell_alpha = XSDataFloat(unit_cell[3])
-        integration_noanom.cell_beta = XSDataFloat(unit_cell[4])
-        integration_noanom.cell_gamma = XSDataFloat(unit_cell[5])
+        integration_noanom.cell_a = unit_cell[0]
+        integration_noanom.cell_b = unit_cell[1]
+        integration_noanom.cell_c = unit_cell[2]
+        integration_noanom.cell_alpha = unit_cell[3]
+        integration_noanom.cell_beta = unit_cell[4]
+        integration_noanom.cell_gamma = unit_cell[5]
         integration_noanom.anomalous = 0
 
         # done with the integration
@@ -975,12 +975,12 @@ fi
         crystal_stats =  self.parse_xds_anom.dataOutput
         if self.integration_id_anom is not None:
             integration_anom.autoProcIntegrationId = self.integration_id_anom
-        integration_anom.cell_a = XSDataFloat(unit_cell[0])
-        integration_anom.cell_b = XSDataFloat(unit_cell[1])
-        integration_anom.cell_c = XSDataFloat(unit_cell[2])
-        integration_anom.cell_alpha = XSDataFloat(unit_cell[3])
-        integration_anom.cell_beta = XSDataFloat(unit_cell[4])
-        integration_anom.cell_gamma = XSDataFloat(unit_cell[5])
+        integration_anom.cell_a = unit_cell[0]
+        integration_anom.cell_b = unit_cell[1]
+        integration_anom.cell_c = unit_cell[2]
+        integration_anom.cell_alpha = unit_cell[3]
+        integration_anom.cell_beta = unit_cell[4]
+        integration_anom.cell_gamma = unit_cell[5]
         integration_anom.anomalous = 1
 
         # done with the integration
