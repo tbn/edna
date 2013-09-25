@@ -60,7 +60,7 @@ class EDPluginExecTruncate(EDPluginExecProcessScript):
         nres = self.dataInput.nres
         anom = self.dataInput.anom.value
         res = self.dataInput.res.value
-        if res is not None:
+        if nres is not None:
             self.addListCommandExecution('nres {0}'.format(nres.value))
         self.addListCommandExecution('truncate YES')
         self.addListCommandExecution('anomalous {0}'.format(anom))
