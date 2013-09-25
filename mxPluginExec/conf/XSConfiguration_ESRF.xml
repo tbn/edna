@@ -531,6 +531,14 @@
           <name>timeOut</name>
           <value>1800</value>
         </XSParamItem>
+	<XSParamItem>
+          <name>ispyb_user</name>
+          <value>${ISPyB_user}</value>
+        </XSParamItem>
+        <XSParamItem>
+          <name>ispyb_password</name>
+          <value>${ISPyB_pass}</value>
+        </XSParamItem>
       </XSParamList>
     </XSPluginItem>
 

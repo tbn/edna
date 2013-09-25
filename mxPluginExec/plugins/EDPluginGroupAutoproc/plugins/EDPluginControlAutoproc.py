@@ -124,6 +124,11 @@ class EDPluginControlAutoproc(EDPluginControl):
         EDPluginControl.__init__(self)
         self.setXSDataInputClass(XSDataAutoprocInput)
 
+    def configure(self):
+        EDPluginControl.configure(self)
+        self.ispyb_user = self.config.get('ispyb_user')
+        self.ispyb_password = self.config.get('ispyb_password')
+
     def checkParameters(self):
         """
         Checks the mandatory parameters.
@@ -753,7 +758,7 @@ fi
 
 
         # we need a PDB file either in ispyb or in the image directory
-        c = suds.client.Client(WS_URL)
+        c = suds.client.Client(WS_URL, username=self.ispyb_user, password=self.ispyb_password)
         pdb_file = c.service.getPdbFilePath(self.dataInput.data_collection_id.value)
         if pdb_file is None:
             EDVerbose.screen('No pdb file in ispyb, trying the toplevel dir {0}'.format(self.root_dir))
