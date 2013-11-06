@@ -92,7 +92,7 @@ class EDPluginResCutoff(EDPlugin):
         if cc_half_cutoff_param is not None:
             cc_half_cutoff = cc_half_cutoff_param.value
         else:
-            cc_half_cutoff = 0.15
+            cc_half_cutoff = 0.30
 
         res_override = self.dataInput.res_override
 
