@@ -68,9 +68,6 @@ from XSDataAutoproc import XSDataXscaleInputFile
 from XSDataAutoproc import XSDataAutoprocInput
 from XSDataAutoproc import XSDataAutoprocImport
 
-edFactoryPlugin.loadModule('XSDataWaitFilev1_0')
-from XSDataWaitFilev1_0 import XSDataInputWaitFile
-
 edFactoryPlugin.loadModule('XSDataISPyBv1_4')
 # plugin input/output
 from XSDataISPyBv1_4 import XSDataInputStoreAutoProc
@@ -285,18 +282,6 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         first_image = _template_to_image(template, start_image)
 
-
-        self.wait_file = self.loadPlugin('EDPluginWaitFile')
-        waitfileinput = XSDataInputWaitFile()
-        waitfileinput.expectedFile = XSDataFile()
-        waitfileinput.expectedFile.path = XSDataString(first_image)
-        waitfileinput.expectedSize = XSDataInteger(0) # we do not care
-        timeout = XSDataTime()
-        global WAIT_FOR_FRAME_TIMEOUT
-        timeout.value = WAIT_FOR_FRAME_TIMEOUT
-        waitfileinput.timeOut = timeout
-        self.wait_file.dataInput = waitfileinput
-
         self.xds_first = self.loadPlugin("EDPluginControlRunXdsFastProc")
         self.xds_first.dataInput = xds_in
 
@@ -339,19 +324,6 @@ class EDPluginControlAutoproc(EDPluginControl):
         except Exception, e:
             EDVerbose.ERROR('could not get integration ID: \n{0}'.format(traceback.format_exc(e)))
             self.integration_id_anom = None
-
-        # wait for the first frame
-        t0=time.time()
-        self.wait_file.executeSynchronous()
-        if self.wait_file.isFailure():
-            self.ERROR('error waiting for the first image file to appear')
-            self.setFailure()
-            return
-        EDVerbose.screen('first frame appeared on time')
-        self.stats['wait_file'] = time.time()-t0
-
-        with open(self.log_file_path, 'w') as f:
-            json.dump(self.stats, f)
 
         # first XDS plugin run with supplied XDS file
         EDVerbose.screen('STARTING XDS run...')
