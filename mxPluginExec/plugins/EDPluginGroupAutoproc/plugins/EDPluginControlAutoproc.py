@@ -162,6 +162,10 @@ class EDPluginControlAutoproc(EDPluginControl):
         except OSError:
             pass
 
+        # Store the files we already uploaded to ispyb at the
+        # intermediate upload so we do not reupload them later.
+        self.uploaded_files = []
+
         # for info to send to the autoproc stats server
         self.custom_stats = dict(creation_time=time.time(),
                                  processing_type='edna fastproc',
@@ -666,6 +670,8 @@ class EDPluginControlAutoproc(EDPluginControl):
             except IOError:
                 self.ERROR('Could not copy {0} to {1}'.format(log, target))
 
+        # Intermediate log to ispyb
+        self.intermediate_ispyb_upload()
 
 
         import_in = XSDataAutoprocImport()
@@ -821,20 +827,20 @@ fi
             pass
 
 
-        #Now that we have executed the whole thing we need to create
-        #the suitable ISPyB plugin input and serialize it to the file
-        #we've been given as input
+    def intermediate_ispyb_upload(self, _edObject=None):
         output = AutoProcContainer()
 
         # AutoProc attr
         autoproc = AutoProc()
 
-        # There's also
-        pointless_sg_str = self.file_conversion.dataOutput.pointless_sgstring
-        if pointless_sg_str is not None:
-            autoproc.spaceGroup = pointless_sg_str.value
-
         xdsout = self.xds_first.dataOutput
+
+        # The spacegroup and unit cell will be updated later with
+        # values from pointless if available
+
+        if xdsout.sg_number is not None:
+            autoproc.spaceGroup = spacegroup = SPACE_GROUP_NAMES[sg_number.value]
+
         autoproc.refinedCell_a = xdsout.cell_a.value
         autoproc.refinedCell_b = xdsout.cell_b.value
         autoproc.refinedCell_c = xdsout.cell_c.value
@@ -967,11 +973,11 @@ fi
         # now for the generated files. There's some magic to do with
         # their paths to determine where to put them on pyarch
         pyarch_path = None
-        # Note: the path is in the form /data/whatever
 
+        # Note: the path is in the form /data/whatever
         # remove the edna-autoproc-import suffix
         original_files_dir = self.file_conversion.dataInput.output_directory.value
-        #files_dir, _ = os.path.split(original_files_dir)
+
         files_dir = original_files_dir
 
         # the whole transformation is fragile!
@@ -1005,6 +1011,8 @@ fi
                     continue
                 if not os.path.splitext(current)[1].lower() in ISPYB_UPLOAD_EXTENSIONS:
                     continue
+                # Store the filename so we don't reupload it later on
+                self.uploaded_files.append(current)
                 new_path = os.path.join(pyarch_path, f)
                 file_list.append(new_path)
                 shutil.copyfile(current,
@@ -1018,26 +1026,21 @@ fi
                 attach.filePath = dirname
                 program_container.AutoProcProgramAttachment.append(attach)
 
-
         program_container.AutoProcProgram.processingStatus = True
         output.AutoProcProgramContainer = program_container
 
         # first with anom
-
         output.AutoProcScalingContainer = scaling_container_anom
 
         ispyb_input = XSDataInputStoreAutoProc()
         ispyb_input.AutoProcContainer = output
 
 
-        with open(self.dataInput.output_file.path.value, 'w') as f:
-            f.write(ispyb_input.marshal())
-
         # store results in ispyb
         self.store_autoproc_anom.dataInput = ispyb_input
         t0=time.time()
         self.store_autoproc_anom.executeSynchronous()
-        self.stats['ispyb_upload'] = time.time() - t0
+        self.stats['ispyb_upload_anom'] = time.time() - t0
 
         with open(self.log_file_path, 'w') as f:
             json.dump(self.stats, f)
@@ -1048,22 +1051,19 @@ fi
             # store the autoproc ID as a filename in the
             # fastproc_integration_ids directory
             os.mknod(os.path.join(self.autoproc_ids_dir, str(self.integration_id_anom)), 0755)
-        # then noanom stats
 
+        # then noanom stats
         output.AutoProcScalingContainer = scaling_container_noanom
 
         ispyb_input = XSDataInputStoreAutoProc()
         ispyb_input.AutoProcContainer = output
 
 
-        with open(self.dataInput.output_file.path.value, 'w') as f:
-            f.write(ispyb_input.marshal())
-
         # store results in ispyb
         self.store_autoproc_noanom.dataInput = ispyb_input
         t0=time.time()
         self.store_autoproc_noanom.executeSynchronous()
-        self.stats['ispyb_upload'] = time.time() - t0
+        self.stats['ispyb_upload_noanom'] = time.time() - t0
 
         with open(self.log_file_path, 'w') as f:
             json.dump(self.stats, f)
