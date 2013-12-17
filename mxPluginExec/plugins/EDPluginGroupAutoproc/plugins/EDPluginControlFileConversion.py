@@ -132,6 +132,7 @@ class EDPluginControlFileConversion(EDPluginControl):
         # copy the aimless log where the results files are
         source_log = os.path.join(self.aimless.getWorkingDirectory(),
                                   self.aimless.getScriptLogFileName())
+        self.aimless_log = source_log
         target_log = os.path.join(self.results_dir,
                                   '{0}aimless_{1}.log'.format(self.image_prefix,
                                                               "anom" if self.dataInput.anom.value else "noanom"))
@@ -214,4 +215,5 @@ class EDPluginControlFileConversion(EDPluginControl):
         res.status = status
         res.pointless_sgnumber = self.pointless.dataOutput.sgnumber
         res.pointless_sgstring = self.pointless.dataOutput.sgstr
+        res.aimless_log = XSDataString(self.aimless_log)
         self.dataOutput = res
