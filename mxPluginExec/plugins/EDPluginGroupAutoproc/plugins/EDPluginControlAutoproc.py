@@ -839,7 +839,7 @@ fi
         # values from pointless if available
 
         if xdsout.sg_number is not None:
-            autoproc.spaceGroup = spacegroup = SPACE_GROUP_NAMES[sg_number.value]
+            autoproc.spaceGroup = spacegroup = SPACE_GROUP_NAMES[xdsout.sg_number.value]
 
         autoproc.refinedCell_a = xdsout.cell_a.value
         autoproc.refinedCell_b = xdsout.cell_b.value
@@ -988,23 +988,8 @@ fi
 
         files_dir = original_files_dir
 
-        # the whole transformation is fragile!
-        if files_dir.startswith('/data/visitor'):
-            # We might get empty elements at the head/tail of the list
-            tokens = [elem for elem in files_dir.split(os.path.sep)
-                      if len(elem) > 0]
-            pyarch_path = os.path.join('/data/pyarch',
-                                       tokens[3], tokens[2],
-                                       *tokens[4:])
-        else:
-            # We might get empty elements at the head/tail of the list
-            tokens = [elem for elem in files_dir.split(os.path.sep)
-                      if len(elem) > 0]
-            if tokens[2] == 'inhouse':
-                pyarch_path = os.path.join('/data/pyarch', tokens[1],
-                                           *tokens[3:])
+        pyarch_path = to_pyarch_path(files_dir)
         if pyarch_path is not None:
-            pyarch_path = pyarch_path.replace('PROCESSED_DATA', 'RAW_DATA')
             try:
                 os.makedirs(pyarch_path)
             except OSError:
@@ -1089,6 +1074,27 @@ def log_to_ispyb(integration_id, step, status, comments=""):
             log_to_ispyb_impl(item, step, status, comments)
     else:
         log_to_ispyb_impl(integration_id, step, status, comments)
+
+def to_pyarch_path(path):
+    # Convert a path to its equivalent on pyarch. The whole
+    # transformation is fragile!
+    if path.startswith('/data/visitor'):
+        # We might get empty elements at the head/tail of the list
+        tokens = [elem for elem in path.split(os.path.sep)
+                  if len(elem) > 0]
+        pyarch_path = os.path.join('/data/pyarch',
+                                   tokens[3], tokens[2],
+                                   *tokens[4:])
+    else:
+        # We might get empty elements at the head/tail of the list
+        tokens = [elem for elem in path.split(os.path.sep)
+                  if len(elem) > 0]
+        if tokens[2] == 'inhouse':
+            pyarch_path = os.path.join('/data/pyarch', tokens[1],
+                                       *tokens[3:])
+    pyarch_path = pyarch_path.replace('PROCESSED_DATA', 'RAW_DATA')
+    return pyarch_path
+
 
 def log_to_ispyb_impl(integration_id, step, status, comments=""):
     # hack in the event we could not create an integration ID
