@@ -33,6 +33,7 @@ WS_URL='http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForCollectionWebServic
 import os
 import os.path
 import time
+import datetime
 import sys
 import json
 import traceback
@@ -53,7 +54,7 @@ except ImportError:
     edFactoryPlugin.loadModule("EDInstallSudsv0_4")
 
 import suds
-
+from suds.sax.date import DateTime
 
 from XSDataCommon import XSDataFile, XSDataBoolean, XSDataString
 from XSDataCommon import  XSDataInteger, XSDataTime, XSDataFloat
@@ -819,6 +820,43 @@ fi
         EDPluginControl.postProcess(self)
         self.DEBUG("EDPluginControlAutoproc.postProcess")
 
+        # We need to upload the files that have been generated since
+        # the intermediate ispyb upload.
+        files_dir = self.file_conversion.dataInput.output_directory.value
+        pyarch_path = to_pyarch_path(files_dir)
+        file_list = []
+
+        for f in os.listdir(files_dir):
+            current = os.path.join(files_dir, f)
+            if not os.path.isfile(current):
+                continue
+            if not os.path.splitext(current)[1].lower() in ISPYB_UPLOAD_EXTENSIONS:
+                continue
+            if current in self.uploaded_files:
+                continue
+
+            # The file has to be uploaded
+            new_path = os.path.join(pyarch_path, f)
+            shutil.copyfile(current, new_path)
+            file_list.append(new_path)
+
+        # Those files have to be uploaded to ispyb.
+        # Use a dirty hack and implement the upload as a function for now
+
+        # Retrieve the autoproc program ids from the upload plugins.
+        anom_program_id = self.ispyb_upload_anom.iAutoProcProgramId
+        noanom_program_id = self.ispyb_upload_noanom.iAutoProcProgramId
+
+        # Create the list of files to upload:
+        files = []
+        for f in file_list:
+            filepath, filename = os.path.split(f)
+            filetype = 'Result'
+            files.append((filename, filepath, filetype))
+
+        ispyb_attach_files(anom_program_id, files, self.ispyb_user, self.ispyb_password)
+        ispyb_attach_files(noanom_program_id, files, self.ispyb_user, self.ispyb_password)
+
         # Create a file in the results directory to indicate all files have been
         # populated in it already so Max's code can be aware of that
         try:
@@ -1066,6 +1104,22 @@ fi
         else:
             # store the autoproc id
             os.mknod(os.path.join(self.autoproc_ids_dir, str(self.integration_id_noanom)), 0755)
+
+def ispyb_attach_files(program_id, files, ispyb_user, ispyb_password):
+    """files is a list of tuples: (filename, filepath, filetype)"""
+    c = suds.client.Client(WS_URL, username=ispyb_user, password=ispyb_password)
+    timestamp = DateTime(datetime.datetime.now())
+    for (filename, filepath, filetype) in files:
+        attach_id = c.service.storeOrUpdateAutoProcProgramAttachment(
+            arg0=None,
+            fileType=filetype,
+            fileName=filename,
+            filePath=filepath,
+            recordTimeStamp=timestamp,
+            autoProcProgramId=program_id)
+    EDVerbose.DEBUG('attached file {0}, attachement id {1}'.format(filename, attach_id))
+
+
 
 # Proxy since the API changed and we can now log to several ids
 def log_to_ispyb(integration_id, step, status, comments=""):
