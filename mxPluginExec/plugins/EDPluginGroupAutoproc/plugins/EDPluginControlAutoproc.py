@@ -934,7 +934,7 @@ fi
         if self.integration_id_noanom is not None:
             integration_noanom.autoProcIntegrationId = self.integration_id_noanom
 
-        unit_cell = self.parse_xds_noanom.dataOutput.unit_cell_constants.value
+        unit_cell = self.parse_xds_noanom.dataOutput.unit_cell_constants
         integration_noanom.cell_a = unit_cell[0]
         integration_noanom.cell_b = unit_cell[1]
         integration_noanom.cell_c = unit_cell[2]
@@ -994,7 +994,7 @@ fi
             integration_anom.autoProcIntegrationId = self.integration_id_anom
 
         # Get the unit cell from XDS generation
-        unit_cell = self.parse_xds_anom.dataOutput.unit_cell_constants.value
+        unit_cell = self.parse_xds_anom.dataOutput.unit_cell_constants
 
         integration_anom.cell_a = unit_cell[0]
         integration_anom.cell_b = unit_cell[1]
