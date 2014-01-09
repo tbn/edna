@@ -897,21 +897,33 @@ fi
 
         scaling_container_noanom.AutoProcScaling = scaling
 
-        inner, outer, overall, unit_cell = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
-        inner_stats = AutoProcScalingStatistics()
-        for k, v in inner.iteritems():
-            setattr(inner_stats, k, v)
-        scaling_container_noanom.AutoProcScalingStatistics.append(inner_stats)
+        xscale_stats_noanom = self.xscale_generate.dataOutput.stats_noanom_merged
+        inner_stats_noanom = xscale_stats_noanom.completeness_entries[0]
+        outer_stats_noanom = xscale_stats_noanom.completeness_entries[-1]
 
-        outer_stats = AutoProcScalingStatistics()
-        for k, v in outer.iteritems():
-            setattr(outer_stats, k, v)
-        scaling_container_noanom.AutoProcScalingStatistics.append(outer_stats)
+        # use the previous shell's res as low res, if available
+        prev_res = self.low_resolution_limit
+        try:
+            prev_res = xscale_stats_noanom.completeness_entries[-2].outer_res.value
+        except IndexError:
+            pass
+        total_stats_noanom = xscale_stats_noanom.total_completeness
 
-        overall_stats = AutoProcScalingStatistics()
-        for k, v in overall.iteritems():
-            setattr(overall_stats, k, v)
-        scaling_container_noanom.AutoProcScalingStatistics.append(overall_stats)
+        stats = _create_scaling_stats(inner_stats_noanom, 'innerShell',
+                                      self.low_resolution_limit, False)
+        overall_low = stats.resolutionLimitLow
+        scaling_container_noanom.AutoProcScalingStatistics.append(stats)
+
+        stats = _create_scaling_stats(outer_stats_noanom, 'outerShell',
+                                      prev_res, False)
+        overall_high = stats.resolutionLimitHigh
+        scaling_container_noanom.AutoProcScalingStatistics.append(stats)
+        stats = _create_scaling_stats(total_stats_noanom, 'overall',
+                                      self.low_resolution_limit, False)
+        stats.resolutionLimitLow = overall_low
+        stats.resolutionLimitHigh = overall_high
+        scaling_container_noanom.AutoProcScalingStatistics.append(stats)
+
 
         integration_container_noanom = AutoProcIntegrationContainer()
         image = Image()
@@ -921,6 +933,8 @@ fi
         integration_noanom = AutoProcIntegration()
         if self.integration_id_noanom is not None:
             integration_noanom.autoProcIntegrationId = self.integration_id_noanom
+
+        unit_cell = self.parse_xds_noanom.dataOutput.unit_cell_constants.value
         integration_noanom.cell_a = unit_cell[0]
         integration_noanom.cell_b = unit_cell[1]
         integration_noanom.cell_c = unit_cell[2]
@@ -935,24 +949,6 @@ fi
 
         # ANOM PATH
         scaling_container_anom = AutoProcScalingContainer()
-
-        inner, outer, overall, unit_cell = _parse_aimless(self.file_conversion.dataOutput.aimless_log_anom.value)
-        inner_stats = AutoProcScalingStatistics()
-        for k, v in inner.iteritems():
-            setattr(inner_stats, k, v)
-        scaling_container_anom.AutoProcScalingStatistics.append(inner_stats)
-
-        outer_stats = AutoProcScalingStatistics()
-        for k, v in outer.iteritems():
-            setattr(outer_stats, k, v)
-        scaling_container_anom.AutoProcScalingStatistics.append(outer_stats)
-
-        overall_stats = AutoProcScalingStatistics()
-        for k, v in overall.iteritems():
-            setattr(overall_stats, k, v)
-        scaling_container_anom.AutoProcScalingStatistics.append(overall_stats)
-
-
 
         scaling = AutoProcScaling()
         scaling.recordTimeStamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -996,6 +992,10 @@ fi
         crystal_stats =  self.parse_xds_anom.dataOutput
         if self.integration_id_anom is not None:
             integration_anom.autoProcIntegrationId = self.integration_id_anom
+
+        # Get the unit cell from XDS generation
+        unit_cell = self.parse_xds_anom.dataOutput.unit_cell_constants.value
+
         integration_anom.cell_a = unit_cell[0]
         integration_anom.cell_b = unit_cell[1]
         integration_anom.cell_c = unit_cell[2]
