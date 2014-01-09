@@ -935,12 +935,12 @@ fi
             integration_noanom.autoProcIntegrationId = self.integration_id_noanom
 
         unit_cell = self.parse_xds_noanom.dataOutput.unit_cell_constants
-        integration_noanom.cell_a = unit_cell[0]
-        integration_noanom.cell_b = unit_cell[1]
-        integration_noanom.cell_c = unit_cell[2]
-        integration_noanom.cell_alpha = unit_cell[3]
-        integration_noanom.cell_beta = unit_cell[4]
-        integration_noanom.cell_gamma = unit_cell[5]
+        integration_noanom.cell_a = unit_cell[0].value
+        integration_noanom.cell_b = unit_cell[1].value
+        integration_noanom.cell_c = unit_cell[2].value
+        integration_noanom.cell_alpha = unit_cell[3].value
+        integration_noanom.cell_beta = unit_cell[4].value
+        integration_noanom.cell_gamma = unit_cell[5].value
         integration_noanom.anomalous = 0
 
         # done with the integration
@@ -996,12 +996,12 @@ fi
         # Get the unit cell from XDS generation
         unit_cell = self.parse_xds_anom.dataOutput.unit_cell_constants
 
-        integration_anom.cell_a = unit_cell[0]
-        integration_anom.cell_b = unit_cell[1]
-        integration_anom.cell_c = unit_cell[2]
-        integration_anom.cell_alpha = unit_cell[3]
-        integration_anom.cell_beta = unit_cell[4]
-        integration_anom.cell_gamma = unit_cell[5]
+        integration_anom.cell_a = unit_cell[0].value
+        integration_anom.cell_b = unit_cell[1].value
+        integration_anom.cell_c = unit_cell[2].value
+        integration_anom.cell_alpha = unit_cell[3].value
+        integration_anom.cell_beta = unit_cell[4].value
+        integration_anom.cell_gamma = unit_cell[5].value
         integration_anom.anomalous = 1
 
         # done with the integration
