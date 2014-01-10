@@ -844,8 +844,8 @@ fi
         # Use a dirty hack and implement the upload as a function for now
 
         # Retrieve the autoproc program ids from the upload plugins.
-        anom_program_id = self.ispyb_upload_anom.iAutoProcProgramId
-        noanom_program_id = self.ispyb_upload_noanom.iAutoProcProgramId
+        anom_program_id = self.store_autoproc_anom.iAutoProcProgramId
+        noanom_program_id = self.store_autoproc_noanom.iAutoProcProgramId
 
         # Create the list of files to upload:
         files = []
