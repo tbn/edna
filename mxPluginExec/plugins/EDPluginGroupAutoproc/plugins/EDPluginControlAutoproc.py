@@ -29,6 +29,7 @@ __copyright__ = "ESRF"
 
 
 WS_URL='http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForCollectionWebService?wsdl'
+AUTOPROC_WS_URL='http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForAutoprocessingWebService?wsdl'
 
 import os
 import os.path
@@ -1107,7 +1108,7 @@ fi
 
 def ispyb_attach_files(program_id, files, ispyb_user, ispyb_password):
     """files is a list of tuples: (filename, filepath, filetype)"""
-    c = suds.client.Client(WS_URL, username=ispyb_user, password=ispyb_password)
+    c = suds.client.Client(AUTOPROC_WS_URL, username=ispyb_user, password=ispyb_password)
     timestamp = DateTime(datetime.datetime.now())
     for (filename, filepath, filetype) in files:
         attach_id = c.service.storeOrUpdateAutoProcProgramAttachment(
