@@ -822,7 +822,7 @@ fi
 
         # We need to upload the files that have been generated since
         # the intermediate ispyb upload.
-        files_dir = self.file_conversion.dataInput.output_directory.value
+        files_dir = self.results_dir
         pyarch_path = to_pyarch_path(files_dir)
         file_list = []
 
@@ -1022,7 +1022,7 @@ fi
 
         # Note: the path is in the form /data/whatever
         # remove the edna-autoproc-import suffix
-        original_files_dir = self.file_conversion.dataInput.output_directory.value
+        original_files_dir = self.results_dir
 
         files_dir = original_files_dir
 
