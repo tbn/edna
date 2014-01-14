@@ -717,6 +717,35 @@ class EDPluginControlAutoproc(EDPluginControl):
             EDVerbose.screen(traceback.format_exc())
 
 
+        # Now that pointless and aimless ran, we can update the values
+        # for the spacegroup and cell dimensions in ispyb
+
+        # XXX: perhaps this hack should be made unnecessary by
+        # modifying the upload plugin so it makes this stuff available
+        # in its output. Only the autoproc id is there.
+        autoproc_id_anom = self.store_autoproc_anom.iAutoProcId
+        autoproc_program_id_anom = self.store_autoproc_anom.iAutoProcProgramId
+        autoproc_id_noanom = self.store_autoproc_noanom.iAutoProcId
+        autoproc_program_id_noanom = self.store_autoproc_noanom.iAutoProcProgramId
+
+        # WHY
+        pointless_sg_str_obj = self.file_conversion.dataOutput.pointless_sgstring
+        if pointless_sg_str_obj is not None:
+            pointless_sg_str = pointless_sg_str_obj.value
+
+        _, _, _, unit_cell_anom = _parse_aimless(self.file_conversion.dataOutput.aimless_log_anom.value)
+        _, _, _, unit_cell_noanom = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
+
+        update_autoproc(self.ispyb_user, self.ispyb_password,
+                        autoproc_id_anom, autoproc_program_id_anom,
+                        pointless_sg_str,
+                        *unit_cell_anom)
+        update_autoproc(self.ispyb_user, self.ispyb_password,
+                        autoproc_id_noanom, autoproc_program_id_noanom,
+                        pointless_sg_str,
+                        *unit_cell_noanom)
+
+
         # Now onto DIMPLE
 
         # create a startup script
@@ -1119,6 +1148,27 @@ def ispyb_attach_files(program_id, files, ispyb_user, ispyb_password):
             recordTimeStamp=timestamp,
             autoProcProgramId=program_id)
     EDVerbose.DEBUG('attached file {0}, attachement id {1}'.format(filename, attach_id))
+
+
+def update_autoproc(ispyb_user, ispyb_password,
+                    autoproc_id,
+                    autoproc_program_id,
+                    spacegroup,
+                    cell_a, cell_b, cell_c,
+                    cell_alpha, cell_beta, cell_gamma):
+    """update the autoprocessing cell dimensions and spacegroup with
+values from both pointless and aimless"""
+    c = suds.client.Client(AUTOPROC_WS_URL, username=ispyb_user, password=ispyb_password)
+    timestamp = DateTime(datetime.datetime.now())
+    c.service.storeOrUpdateAutoProc(arg0=autoproc_id, autoProcProgramId=autoproc_program_id,
+                                    spaceGroup=spacegroup,
+                                    refinedCell_a=cell_a,
+                                    refinedCell_b=cell_b,
+                                    refinedCell_c=cell_c,
+                                    refinedCell_alpha=cell_alpha,
+                                    refinedCell_beta=cell_beta,
+                                    refinedCell_gamma=cell_gamma)
+
 
 
 
