@@ -302,7 +302,7 @@ def _extract_completeness_entries(lines, output):
         # Extract values and store them in the data model
         for (name, (start, end)) in offsets.iteritems():
             value = float(line[start:end])
-            setattr(output.total_completeness, name, value)
+            setattr(completeness_entry, name, value)
 
         if total:
             output.total_completeness = completeness_entry
