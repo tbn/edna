@@ -286,7 +286,7 @@ def _extract_completeness_entries(lines, output):
         'outer_possible': (30, 39),
         'outer_complete': (40, 50),
         'outer_rfactor': (52, 61),
-        'outer_isig': (81, 80),
+        'outer_isig': (81, 89),
         'half_dataset_correlation': (98, 106)
     }
 
