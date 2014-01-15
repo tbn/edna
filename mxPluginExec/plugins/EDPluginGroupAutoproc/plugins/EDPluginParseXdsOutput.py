@@ -297,12 +297,12 @@ def _extract_completeness_entries(lines, output):
 
         if not total:
             # regular line, so extract the resolution
-            completeness_entry.outer_res = float(line[res_start:res_end])
+            completeness_entry.outer_res = XSDataFloat(float(line[res_start:res_end]))
 
         # Extract values and store them in the data model
         for (name, (start, end)) in offsets.iteritems():
             value = float(line[start:end])
-            setattr(completeness_entry, name, value)
+            setattr(completeness_entry, name, XSDataFloat(value))
 
         if total:
             output.total_completeness = completeness_entry
