@@ -281,13 +281,13 @@ def _extract_completeness_entries(lines, output):
     res_start = 0
     res_end = 9
     offsets = {
-        'outer_observed': (10, 21),
-        'outer_unique': (22, 29),
-        'outer_possible': (30, 39),
-        'outer_complete': (40, 50),
-        'outer_rfactor': (52, 61),
+        'outer_observed': (9, 21),
+        'outer_unique': (21, 29),
+        'outer_possible': (29, 39),
+        'outer_complete': (39, 50),
+        'outer_rfactor': (51, 61),
         'outer_isig': (81, 89),
-        'half_dataset_correlation': (98, 106)
+        'half_dataset_correlation': (99, 107)
     }
 
 
