@@ -190,7 +190,7 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         xds_in = XSDataMinimalXdsIn()
         xds_in.input_file = data_in.input_file.path
-        xds_in.spacegroup = sgnumber
+        xds_in.spacegroup = XSDataInteger(sgnumber)
         xds_in.unit_cell = data_in.unit_cell
 
         self.log_file_path = os.path.join(self.root_dir, 'stats.json')
