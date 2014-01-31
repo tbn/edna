@@ -176,21 +176,20 @@ class EDPluginControlAutoproc(EDPluginControl):
         # Check if the spacegroup needs to be converted to a number
         # (ie it's a symbolic thing)
         sgnumber = None
-        try:
-            sgnumber = int(data_in.spacegroup.value)
-        except ValueError:
-            # strip all whitespace and upcase the whole thing
-            cleanedup = data_in.spacegroup.value.replace(' ', '').upper()
-            if cleanedup in SPACE_GROUP_NUMBERS:
-                sgnumber = SPACE_GROUP_NUMBERS[cleanedup]
+        if data_in.spacegroup is not None:
+            try:
+                sgnumber = int(data_in.spacegroup.value)
+            except ValueError:
+                # strip all whitespace and upcase the whole thing
+                cleanedup = data_in.spacegroup.value.replace(' ', '').upper()
+                if cleanedup in SPACE_GROUP_NUMBERS:
+                    sgnumber = SPACE_GROUP_NUMBERS[cleanedup]
 
-        if sgnumber is None:
-            EDVerbose.WARNING('could not convert spacegroup number/name: {0}'.format(data_in.spacegroup.value))
-            EDVerbose.WARNING('things will probably fail later')
 
         xds_in = XSDataMinimalXdsIn()
         xds_in.input_file = data_in.input_file.path
-        xds_in.spacegroup = XSDataInteger(sgnumber)
+        if sgnumber is not None:
+            xds_in.spacegroup = XSDataInteger(sgnumber)
         xds_in.unit_cell = data_in.unit_cell
 
         self.log_file_path = os.path.join(self.root_dir, 'stats.json')
