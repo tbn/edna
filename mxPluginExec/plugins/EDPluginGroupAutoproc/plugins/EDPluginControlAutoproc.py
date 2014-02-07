@@ -1213,8 +1213,10 @@ def _parse_aimless(filepath):
         if started:
             for prefix, prop_name in INTERESTING_LINES.iteritems():
                 if line.startswith(prefix):
+                    # We need to multiply the values for rMerge by 100
+                    factor = 100 if prop_name == 'rMerge' else 1
                     # 3 last columns are the values we're after
-                    overall, inner, outer = [float(x) * 100 for x in line.split()[-3:]]
+                    overall, inner, outer = [float(x) * factor for x in line.split()[-3:]]
                     overall_stats[prop_name] = overall
                     inner_stats[prop_name] = inner
                     outer_stats[prop_name] = outer
