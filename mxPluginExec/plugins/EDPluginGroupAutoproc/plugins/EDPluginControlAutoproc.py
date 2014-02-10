@@ -852,12 +852,8 @@ fi
             autoproc.spaceGroup = pointless_sg_str.value
 
         xdsout = self.xds_first.dataOutput
-        autoproc.refinedCell_a = xdsout.cell_a.value
-        autoproc.refinedCell_b = xdsout.cell_b.value
-        autoproc.refinedCell_c = xdsout.cell_c.value
-        autoproc.refinedCell_alpha = xdsout.cell_alpha.value
-        autoproc.refinedCell_beta = xdsout.cell_beta.value
-        autoproc.refinedCell_gamma = xdsout.cell_gamma.value
+
+        # The unit cell will be taken from the no anom aimless run below
 
         output.AutoProc = autoproc
 
@@ -871,6 +867,14 @@ fi
         scaling_container_noanom.AutoProcScaling = scaling
 
         inner, outer, overall, unit_cell = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
+
+        autoproc.refinedCell_a = str(unit_cell[0])
+        autoproc.refinedCell_b = str(unit_cell[1])
+        autoproc.refinedCell_c = str(unit_cell[2])
+        autoproc.refinedCell_alpha = str(unit_cell[3])
+        autoproc.refinedCell_beta = str(unit_cell[4])
+        autoproc.refinedCell_gamma = str(unit_cell[5])
+
         inner_stats = AutoProcScalingStatistics()
         for k, v in inner.iteritems():
             setattr(inner_stats, k, v)
