@@ -68,7 +68,7 @@ class EDPluginResCutoff(EDPlugin):
 
     def preProcess(self, _edObject = None):
         EDPlugin.preProcess(self)
-        self.DEBUG("EDPluginParseXdsOutput.preProcess")
+        self.DEBUG("EDPluginResCutoff.preProcess")
 
     def process(self, _edObject = None):
         EDPlugin.process(self)
