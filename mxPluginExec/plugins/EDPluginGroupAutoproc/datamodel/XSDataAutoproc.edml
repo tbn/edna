@@ -60,14 +60,14 @@ complex type XSDataXdsOutputFile extends XSDataInput {
 }
 
 complex type XSDataXdsCompletenessEntry {
-        outer_res                : XSDataFloat
-        outer_observed           : XSDataFloat
-        outer_unique             : XSDataFloat
-        outer_possible           : XSDataFloat
-        outer_complete           : XSDataFloat
-        outer_rfactor            : XSDataFloat
-        outer_isig               : XSDataFloat
-        half_dataset_correlation : XSDataFloat
+        res				: XSDataFloat
+        observed			: XSDataFloat
+        unique				: XSDataFloat
+        possible			: XSDataFloat
+        complete			: XSDataFloat
+        rfactor				: XSDataFloat
+        isig				: XSDataFloat
+        half_dataset_correlation	: XSDataFloat
 }
 
 complex type XSData2DCoordinates {

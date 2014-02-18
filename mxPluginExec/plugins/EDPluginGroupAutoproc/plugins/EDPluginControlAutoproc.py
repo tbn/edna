@@ -412,12 +412,12 @@ class EDPluginControlAutoproc(EDPluginControl):
         xdsresult = self.xds_first.dataOutput
 
         # for the custom stats
-        self.custom_stats['overall_i_over_sigma']=xdsresult.total_completeness.outer_isig.value
-        self.custom_stats['overall_r_value']=xdsresult.total_completeness.outer_rfactor.value
-        self.custom_stats['inner_i_over_sigma']=xdsresult.completeness_entries[0].outer_isig.value
-        self.custom_stats['inner_r_value']=xdsresult.completeness_entries[0].outer_rfactor.value
-        self.custom_stats['outer_i_over_sigma']=xdsresult.completeness_entries[-1].outer_isig.value
-        self.custom_stats['outer_r_value']=xdsresult.completeness_entries[-1].outer_rfactor.value
+        self.custom_stats['overall_i_over_sigma']=xdsresult.total_completeness.isig.value
+        self.custom_stats['overall_r_value']=xdsresult.total_completeness.rfactor.value
+        self.custom_stats['inner_i_over_sigma']=xdsresult.completeness_entries[0].isig.value
+        self.custom_stats['inner_r_value']=xdsresult.completeness_entries[0].rfactor.value
+        self.custom_stats['i_over_sigma']=xdsresult.completeness_entries[-1].isig.value
+        self.custom_stats['r_value']=xdsresult.completeness_entries[-1].rfactor.value
 
 
         res_cutoff_in = XSDataResCutoff()
@@ -943,7 +943,7 @@ fi
         # use the previous shell's res as low res if available
         prev_res = self.low_resolution_limit
         try:
-            prev_res = xscale_stats_anom.completeness_entries[-2].outer_res.value
+            prev_res = xscale_stats_anom.completeness_entries[-2].res.value
         except IndexError:
             pass
         total_stats_anom = xscale_stats_anom.total_completeness
@@ -1151,14 +1151,14 @@ def _create_scaling_stats(xscale_stats, stats_type, lowres, anom):
     stats.scalingStatisticsType = stats_type
     stats.resolutionLimitLow = lowres
     if stats_type != 'overall':
-        stats.resolutionLimitHigh = xscale_stats.outer_res.value
-    stats.meanIOverSigI = xscale_stats.outer_isig.value
-    stats.completeness = xscale_stats.outer_complete.value
+        stats.resolutionLimitHigh = xscale_stats.res.value
+    stats.meanIOverSigI = xscale_stats.isig.value
+    stats.completeness = xscale_stats.complete.value
     stats.multiplicity = xscale_stats.multiplicity.value
     # The ispyb plugin DOES NOT convert to the right data types. This
     # happens to be an integer on the ispyb side
-    stats.nTotalObservations = int(xscale_stats.outer_observed.value)
-    stats.rMerge = xscale_stats.outer_rfactor.value
+    stats.nTotalObservations = int(xscale_stats.observed.value)
+    stats.rMerge = xscale_stats.rfactor.value
     stats.anomalous = anom
 
     return stats
