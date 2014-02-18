@@ -97,9 +97,6 @@ complex type XSDataResCutoff extends XSDataInput {
 	res_override : XSDataFloat optional
 
 	// the parameters we can use for cutoff
-	completeness_cutoff : XSDataFloat optional
-	isig_cutoff : XSDataFloat optional
-	r_value_cutoff : XSDataFloat optional
 	cc_half_cutoff : XSDataFloat optional
 }
 
