@@ -276,17 +276,15 @@ def _extract_completeness_entries(lines, output):
     # 1130  FORMAT(F9.2,I12,I8,I10,F11.1,'%',F10.1,'%',F9.1,'%',I9,F8.2,      &
     #              F8.1,'%',F8.1,A1,I6,A1,F8.3,I8)
 
-    # TODO: rename all those damned fields to remove the 'outer_'
-    # prefix which makes no sense
     res_start = 0
     res_end = 9
     offsets = {
-        'outer_observed': (9, 21),
-        'outer_unique': (21, 29),
-        'outer_possible': (29, 39),
-        'outer_complete': (39, 50),
-        'outer_rfactor': (51, 61),
-        'outer_isig': (81, 89),
+        'observed': (9, 21),
+        'unique': (21, 29),
+        'possible': (29, 39),
+        'complete': (39, 50),
+        'rfactor': (51, 61),
+        'isig': (81, 89),
         'half_dataset_correlation': (99, 107)
     }
 
@@ -297,7 +295,7 @@ def _extract_completeness_entries(lines, output):
 
         if not total:
             # regular line, so extract the resolution
-            completeness_entry.outer_res = XSDataFloat(float(line[res_start:res_end]))
+            completeness_entry.res = XSDataFloat(float(line[res_start:res_end]))
 
         # Extract values and store them in the data model
         for (name, (start, end)) in offsets.iteritems():
