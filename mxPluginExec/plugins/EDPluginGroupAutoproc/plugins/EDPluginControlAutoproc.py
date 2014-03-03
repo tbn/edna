@@ -949,7 +949,7 @@ fi
         # use the previous shell's res as low res, if available
         prev_res = self.low_resolution_limit
         try:
-            prev_res = xscale_stats_noanom.completeness_entries[-2].outer_res.value
+            prev_res = xscale_stats_noanom.completeness_entries[-2].res.value
         except IndexError:
             pass
         total_stats_noanom = xscale_stats_noanom.total_completeness
