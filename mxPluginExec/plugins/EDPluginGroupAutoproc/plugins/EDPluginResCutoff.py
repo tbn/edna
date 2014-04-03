@@ -122,7 +122,7 @@ class EDPluginResCutoff(EDPlugin):
                (res_override is not None and current_res < res_override.value):
                 if complete < completeness_cutoff:
                     EDVerbose.DEBUG('incomplete data (%s) in this shell' % complete)
-                break
+                continue
             else:
                 bins.append(current_res)
 
