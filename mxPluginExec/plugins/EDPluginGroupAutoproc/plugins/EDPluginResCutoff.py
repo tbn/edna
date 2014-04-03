@@ -122,19 +122,9 @@ class EDPluginResCutoff(EDPlugin):
                (res_override is not None and current_res < res_override.value):
                 if complete < completeness_cutoff:
                     EDVerbose.DEBUG('incomplete data (%s) in this shell' % complete)
-                    res = prev_res
-                else:
-                    res = _calculate_res_from_bins(prev_isig, prev_res,
-                                                   isig, res,
-                                                   isig_cutoff)
-                bins.append(current_res)
-
-                #NOTE: get out of the loop, see the value of `skip` in
-                #max's code
                 break
             else:
                 bins.append(current_res)
-            prev_res, prev_isig = current_res, isig
 
         # Now the implementation of what max does when he encouters
         # the total values, which are conveniently already parsed in
@@ -151,8 +141,8 @@ Stopping""")
             res = sorted(bins)[0]
         if res_override is not None:
             res = res_override.value
-        # remove last bin (see why w/ max)
-        retbins = [XSDataFloat(x) for x in bins[:-1]]
+
+        retbins = [XSDataFloat(x) for x in bins]
 
 
         data_output = XSDataResCutoffResult()
