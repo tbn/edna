@@ -118,10 +118,8 @@ class EDPluginResCutoff(EDPlugin):
             cc_half = entry.half_dataset_correlation.value
 
             #isig < isig_cutoff or \
-            if complete < local_completeness_cutoff or cc_half < cc_half_cutoff or \
+            if cc_half < cc_half_cutoff or \
                (res_override is not None and current_res < res_override.value):
-                if complete < completeness_cutoff:
-                    EDVerbose.DEBUG('incomplete data (%s) in this shell' % complete)
                 continue
             else:
                 bins.append(current_res)
