@@ -2,14 +2,14 @@ from __future__ import with_statement
 
 # coding: utf8
 #
-#    Project: <projectName>
+#    Project: Autoproc
 #             http://www.edna-site.org
 #
 #    File: "$Id$"
 #
-#    Copyright (C) <copyright>
+#    Copyright (C) ESRF
 #
-#    Principal author:       <author>
+#    Principal author: Thomas Boeglin
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@ from __future__ import with_statement
 
 
 
-__author__="thomas boeglin"
+__author__="Thomas Boeglin"
 __license__ = "GPLv3+"
-__copyright__ = "<copyright>"
+__copyright__ = "ESRF"
 
 
 
@@ -38,6 +38,7 @@ import os.path
 import shutil
 
 from EDPlugin import EDPlugin
+from EDVerbose import EDVerbose
 from XSDataCommon import XSDataBoolean, XSDataInteger, XSDataFloat
 from XSDataCommon import XSDataVectorDouble, XSDataString
 from XSDataAutoproc import XSDataXdsOutputFile, XSDataXdsOutput
@@ -266,24 +267,44 @@ def _extract_infos(lines, output):
         raise ValueError('Some parameters missing')
 
 def _extract_completeness_entries(lines, output):
+    # Since the latest XDS version there's no guarantee the fields
+    # will be separated by whitespace. What's fixed is the size of
+    # each field. So we'll now use fixed offsets to extract the
+    # fields.
+
+    # The Fortran code uses this format statement:
+    # 1130  FORMAT(F9.2,I12,I8,I10,F11.1,'%',F10.1,'%',F9.1,'%',I9,F8.2,      &
+    #              F8.1,'%',F8.1,A1,I6,A1,F8.3,I8)
+
+    # TODO: rename all those damned fields to remove the 'outer_'
+    # prefix which makes no sense
+    res_start = 0
+    res_end = 9
+    offsets = {
+        'outer_observed': (9, 21),
+        'outer_unique': (21, 29),
+        'outer_possible': (29, 39),
+        'outer_complete': (39, 50),
+        'outer_rfactor': (51, 61),
+        'outer_isig': (81, 89),
+        'half_dataset_correlation': (99, 107)
+    }
+
+
     for line in lines:
-        if line.find('total') != -1:
-            # special case for the last table line which contains the
-            # totals
-            infos = [float(x.replace('%', '').replace('*','')) for x in line.split()[1:]]
-            output.total_completeness = XSDataXdsCompletenessEntry()
-            output.total_completeness.outer_complete = XSDataFloat(infos[3])
-            output.total_completeness.outer_rfactor = XSDataFloat(infos[4])
-            output.total_completeness.outer_isig = XSDataFloat(infos[7])
-            output.total_completeness.half_dataset_correlation = XSDataFloat(infos[10])
+        completeness_entry = XSDataXdsCompletenessEntry()
+        total = (line.find('total') != -1)
+
+        if not total:
+            # regular line, so extract the resolution
+            completeness_entry.outer_res = XSDataFloat(float(line[res_start:res_end]))
+
+        # Extract values and store them in the data model
+        for (name, (start, end)) in offsets.iteritems():
+            value = float(line[start:end])
+            setattr(completeness_entry, name, XSDataFloat(value))
+
+        if total:
+            output.total_completeness = completeness_entry
         else:
-            # regular line, do not strip the first elem and bump the
-            # indices by 1
-            infos = [float(x.replace('%', '').replace('*','')) for x in line.split()]
-            res = XSDataXdsCompletenessEntry()
-            res.outer_res = XSDataFloat(infos[0])
-            res.outer_complete = XSDataFloat(infos[4])
-            res.outer_rfactor = XSDataFloat(infos[5])
-            res.outer_isig = XSDataFloat(infos[8])
-            res.half_dataset_correlation = XSDataFloat(infos[10])
-            output.completeness_entries.append(res)
+            output.completeness_entries.append(completeness_entry)

@@ -458,6 +458,7 @@ class EDPluginControlCharacterisationv1_3(EDPluginControl):
         EDVerbose.DEBUG("EDPluginControlCharacterisationv1_3.doSuccessXDSGenerateBackgroundImage")
         self.retrieveSuccessMessages(_edPlugin, "EDPluginControlCharacterisationv1_3.doSuccessXDSGenerateBackgroundImage")
         self._xsDataFileXdsBackgroundImage = self._edPluginControlXDSGenerateBackgroundImage.getDataOutput().getXdsBackgroundImage()
+        self._xsDataResultCharacterisation.setXdsBackgroundImage(self._xsDataFileXdsBackgroundImage)
 
 
     def doFailureXDSGenerateBackgroundImage(self, _edPlugin=None):
@@ -479,6 +480,10 @@ class EDPluginControlCharacterisationv1_3(EDPluginControl):
         strErrorMessage = "Execution of strategy plugin failed."
         EDVerbose.ERROR(strErrorMessage)
         self.addErrorMessage(strErrorMessage)
+        xsDataStrategyResult = self._edPluginControlStrategy.getDataOutput()
+        self._xsDataResultCharacterisation.setStrategyResult(xsDataStrategyResult)
+        if self._edPluginControlStrategy.hasDataOutput("strategyShortSummary"):
+            self._strCharacterisationShortSummary += self._edPluginControlStrategy.getDataOutput("strategyShortSummary")[0].getValue()
         if self._xsDataResultCharacterisation is not None:
             self.setDataOutput(self._xsDataResultCharacterisation)
         self.addStatusMessage("Strategy calculation FAILURE.")

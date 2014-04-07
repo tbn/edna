@@ -1,6 +1,13 @@
 #some kw can be specified multiple times (values are accumulated in a
 #list I guess). Those are: EXCLUDE_RESOLUTION_RANGE, SPOT_RANGE
 
+REPEATABLE_PARAMS = ['UNTRUSTED_RECTANGLE=',
+                     'UNTRUSTED_ELLIPSE=',
+                     'UNTRUSTED_QUADRILATERAL=',
+                     'EXCLUDE_RESOLUTION_RANGE=',
+                     'SPOT_RANGE=']
+
+
 # parsers
 
 class List(object):
@@ -25,7 +32,7 @@ class Image(object):
         KNOWN_FORMATS = []
 
         if len(chunks) > 3 or len(chunks) < 1:
-            raise ValueError, "wrong file spec: %s" % chunk
+            raise ValueError, "wrong file spec: %s" % chunks
         if len(chunks) == 2:
             #2nd val is the format, check it
             if chunks[1] not in KNOWN_FORMATS:
@@ -76,7 +83,7 @@ class BoundedList(object):
     def __call__(self, chunks):
         if not (0 < len(chunks) < self.maxsize):
             raise ValueError, "too many or too few args: %s" % chunks
-        return [transform(elem) for elem in chunks]
+        return [self.transform(elem) for elem in chunks]
 
 class RefineJobs(Enumeration):
     def __init__(self):
