@@ -98,7 +98,7 @@
          </XSParamItem>
          <XSParamItem>
             <name>execProcessScriptExecutable</name>
-            <value>${CCP4}/bin/truncate</value>
+            <value>/opt/pxsoft/bin/truncate</value>
          </XSParamItem>
          <XSParamItem>
             <name>execProcessScriptVersionString</name>
