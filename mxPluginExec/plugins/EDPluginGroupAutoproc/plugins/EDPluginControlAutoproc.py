@@ -991,7 +991,7 @@ fi
         program_container = AutoProcProgramContainer()
         program_container.AutoProcProgram = AutoProcProgram()
         program_container.AutoProcProgram.processingCommandLine = ' '.join(sys.argv)
-        program_container.AutoProcProgram.processingPrograms = 'edna-fastproc'
+        program_container.AutoProcProgram.processingPrograms = 'EDNAproc'
 
         # now for the generated files. There's some magic to do with
         # their paths to determine where to put them on pyarch
