@@ -53,7 +53,6 @@ class EDPluginExecPointless(EDPluginExecProcessScript):
         EDPluginExecProcessScript.preProcess(self)
         self.DEBUG('Pointless: preprocess')
         if self.output_file is not None and self.input_file is not None:
-            # TODO: ask Max why he forces the version to 6.2.0
             options = '''xdsin {0} hklout {1}
 setting symmetry-based'''.format(self.input_file,
                                  self.output_file)
