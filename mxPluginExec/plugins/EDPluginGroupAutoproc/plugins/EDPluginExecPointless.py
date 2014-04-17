@@ -53,9 +53,8 @@ class EDPluginExecPointless(EDPluginExecProcessScript):
         EDPluginExecProcessScript.preProcess(self)
         self.DEBUG('Pointless: preprocess')
         if self.output_file is not None and self.input_file is not None:
-            options = '''xdsin {0} hklout {1}
-setting symmetry-based'''.format(self.input_file,
-                                 self.output_file)
+            options = '''xdsin {0} hklout {1}'''.format(self.input_file,
+                                                        self.output_file)
             self.setScriptCommandline(options)
             self.DEBUG('command line options set to {0}'.format(options))
 
