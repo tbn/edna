@@ -57,7 +57,6 @@ class EDPluginExecPointless(EDPluginExecProcessScript):
                                                         self.output_file)
             self.setScriptCommandline(options)
             self.DEBUG('command line options set to {0}'.format(options))
-        self.addInputLine('setting symmetry-based')
 
     def checkParameters(self):
         self.DEBUG('Pointless: checkParameters')
