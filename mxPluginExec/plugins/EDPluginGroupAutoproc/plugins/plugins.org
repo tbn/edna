@@ -31,8 +31,6 @@ Runs pointless.
 Runs truncate.
 *** EDPluginExecUniqueify.py
 Runs uniqueify.
-*** EDPluginExecXdsToSca.py
-Converts a XDS ASCII file to a .sca file
 
 ** EDPluginControlRunXdsFastProc.py
 This plugin runs XDS up to four times, increasing the spot range at
