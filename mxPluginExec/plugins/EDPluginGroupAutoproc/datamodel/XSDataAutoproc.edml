@@ -281,7 +281,7 @@ complex type XSDataDimpleIn extends XSDataInput {
 	input_mtz	: XSDataString
 	icol		: XSDataString optional
 	sigi_col	: XSDataString optional
-	output_dir	: XSDataString optional
+	output_dir	: XSDataString
 	output_mtz	: XSDataString optional
 	output_pdb	: XSDataString optional
 
