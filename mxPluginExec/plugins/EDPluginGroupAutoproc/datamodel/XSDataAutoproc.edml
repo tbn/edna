@@ -275,3 +275,18 @@ complex type XSDataAutoprocImportOut extends XSDataResult {
 	aimless_log_anom        : XSDataString
 	aimless_log_noanom	: XSDataString
 }
+
+complex type XSDataDimpleIn extends XSDataInput {
+	input_pdb	: XSDataString
+	input_mtz	: XSDataString
+	icol		: XSDataString optional
+	sigi_col	: XSDataString optional
+	output_dir	: XSDataString optional
+	output_mtz	: XSDataString optional
+	output_pdb	: XSDataString optional
+
+}
+
+complex type XSDataDimpleOut extends XSDataResult {
+
+}
