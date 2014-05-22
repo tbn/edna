@@ -29,10 +29,12 @@ __copyright__ = "ESRF"
 
 
 WS_URL='http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForCollectionWebService?wsdl'
+AUTOPROC_WS_URL='http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForAutoprocessingWebService?wsdl'
 
 import os
 import os.path
 import time
+import datetime
 import sys
 import json
 import traceback
@@ -51,9 +53,8 @@ try:
 except ImportError:
     EDVerbose.warning('Suds not installed system wide, will try the EDNA bundled one')
     edFactoryPlugin.loadModule("EDInstallSudsv0_4")
-
-import suds
-
+    import suds
+from suds.sax.date import DateTime
 
 from XSDataCommon import XSDataFile, XSDataBoolean, XSDataString
 from XSDataCommon import  XSDataInteger, XSDataTime, XSDataFloat
@@ -161,6 +162,10 @@ class EDPluginControlAutoproc(EDPluginControl):
             self.DEBUG('system load avg: {0}'.format(os.getloadavg()))
         except OSError:
             pass
+
+        # Store the files we already uploaded to ispyb at the
+        # intermediate upload so we do not reupload them later.
+        self.uploaded_files = []
 
         # for info to send to the autoproc stats server
         self.custom_stats = dict(creation_time=time.time(),
@@ -683,6 +688,8 @@ class EDPluginControlAutoproc(EDPluginControl):
             except IOError:
                 self.ERROR('Could not copy {0} to {1}'.format(log, target))
 
+        # Intermediate log to ispyb
+        self.intermediate_ispyb_upload()
 
 
         import_in = XSDataAutoprocImport()
@@ -724,6 +731,35 @@ class EDPluginControlAutoproc(EDPluginControl):
         except Exception, e:
             EDVerbose.screen('could not logs stats to custom log server')
             EDVerbose.screen(traceback.format_exc())
+
+
+        # Now that pointless and aimless ran, we can update the values
+        # for the spacegroup and cell dimensions in ispyb
+
+        # XXX: perhaps this hack should be made unnecessary by
+        # modifying the upload plugin so it makes this stuff available
+        # in its output. Only the autoproc id is there.
+        autoproc_id_anom = self.store_autoproc_anom.iAutoProcId
+        autoproc_program_id_anom = self.store_autoproc_anom.iAutoProcProgramId
+        autoproc_id_noanom = self.store_autoproc_noanom.iAutoProcId
+        autoproc_program_id_noanom = self.store_autoproc_noanom.iAutoProcProgramId
+
+        # WHY
+        pointless_sg_str_obj = self.file_conversion.dataOutput.pointless_sgstring
+        if pointless_sg_str_obj is not None:
+            pointless_sg_str = pointless_sg_str_obj.value
+
+        _, _, _, unit_cell_anom = _parse_aimless(self.file_conversion.dataOutput.aimless_log_anom.value)
+        _, _, _, unit_cell_noanom = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
+
+        update_autoproc(self.ispyb_user, self.ispyb_password,
+                        autoproc_id_anom, autoproc_program_id_anom,
+                        pointless_sg_str,
+                        *unit_cell_anom)
+        update_autoproc(self.ispyb_user, self.ispyb_password,
+                        autoproc_id_noanom, autoproc_program_id_noanom,
+                        pointless_sg_str,
+                        *unit_cell_noanom)
 
 
         # Now onto DIMPLE
@@ -830,6 +866,43 @@ fi
         EDPluginControl.postProcess(self)
         self.DEBUG("EDPluginControlAutoproc.postProcess")
 
+        # We need to upload the files that have been generated since
+        # the intermediate ispyb upload.
+        files_dir = self.results_dir
+        pyarch_path = to_pyarch_path(files_dir)
+        file_list = []
+
+        for f in os.listdir(files_dir):
+            current = os.path.join(files_dir, f)
+            if not os.path.isfile(current):
+                continue
+            if not os.path.splitext(current)[1].lower() in ISPYB_UPLOAD_EXTENSIONS:
+                continue
+            if current in self.uploaded_files:
+                continue
+
+            # The file has to be uploaded
+            new_path = os.path.join(pyarch_path, f)
+            shutil.copyfile(current, new_path)
+            file_list.append(new_path)
+
+        # Those files have to be uploaded to ispyb.
+        # Use a dirty hack and implement the upload as a function for now
+
+        # Retrieve the autoproc program ids from the upload plugins.
+        anom_program_id = self.store_autoproc_anom.iAutoProcProgramId
+        noanom_program_id = self.store_autoproc_noanom.iAutoProcProgramId
+
+        # Create the list of files to upload:
+        files = []
+        for f in file_list:
+            filepath, filename = os.path.split(f)
+            filetype = 'Result'
+            files.append((filename, filepath, filetype))
+
+        ispyb_attach_files(anom_program_id, files, self.ispyb_user, self.ispyb_password)
+        ispyb_attach_files(noanom_program_id, files, self.ispyb_user, self.ispyb_password)
+
         # Create a file in the results directory to indicate all files have been
         # populated in it already so Max's code can be aware of that
         try:
@@ -838,22 +911,26 @@ fi
             pass
 
 
-        #Now that we have executed the whole thing we need to create
-        #the suitable ISPyB plugin input and serialize it to the file
-        #we've been given as input
+    def intermediate_ispyb_upload(self, _edObject=None):
         output = AutoProcContainer()
 
         # AutoProc attr
         autoproc = AutoProc()
 
-        # There's also
-        pointless_sg_str = self.file_conversion.dataOutput.pointless_sgstring
-        if pointless_sg_str is not None:
-            autoproc.spaceGroup = pointless_sg_str.value
-
         xdsout = self.xds_first.dataOutput
 
-        # The unit cell will be taken from the no anom aimless run below
+        # The spacegroup and unit cell will be updated later with
+        # values from pointless if available
+
+        if xdsout.sg_number is not None:
+            autoproc.spaceGroup = spacegroup = SPACE_GROUP_NAMES[xdsout.sg_number.value]
+
+        autoproc.refinedCell_a = xdsout.cell_a.value
+        autoproc.refinedCell_b = xdsout.cell_b.value
+        autoproc.refinedCell_c = xdsout.cell_c.value
+        autoproc.refinedCell_alpha = xdsout.cell_alpha.value
+        autoproc.refinedCell_beta = xdsout.cell_beta.value
+        autoproc.refinedCell_gamma = xdsout.cell_gamma.value
 
         output.AutoProc = autoproc
 
@@ -866,29 +943,33 @@ fi
 
         scaling_container_noanom.AutoProcScaling = scaling
 
-        inner, outer, overall, unit_cell = _parse_aimless(self.file_conversion.dataOutput.aimless_log_noanom.value)
+        xscale_stats_noanom = self.xscale_generate.dataOutput.stats_noanom_merged
+        inner_stats_noanom = xscale_stats_noanom.completeness_entries[0]
+        outer_stats_noanom = xscale_stats_noanom.completeness_entries[-1]
 
-        autoproc.refinedCell_a = str(unit_cell[0])
-        autoproc.refinedCell_b = str(unit_cell[1])
-        autoproc.refinedCell_c = str(unit_cell[2])
-        autoproc.refinedCell_alpha = str(unit_cell[3])
-        autoproc.refinedCell_beta = str(unit_cell[4])
-        autoproc.refinedCell_gamma = str(unit_cell[5])
+        # use the previous shell's res as low res, if available
+        prev_res = self.low_resolution_limit
+        try:
+            prev_res = xscale_stats_noanom.completeness_entries[-2].outer_res.value
+        except IndexError:
+            pass
+        total_stats_noanom = xscale_stats_noanom.total_completeness
 
-        inner_stats = AutoProcScalingStatistics()
-        for k, v in inner.iteritems():
-            setattr(inner_stats, k, v)
-        scaling_container_noanom.AutoProcScalingStatistics.append(inner_stats)
+        stats = _create_scaling_stats(inner_stats_noanom, 'innerShell',
+                                      self.low_resolution_limit, False)
+        overall_low = stats.resolutionLimitLow
+        scaling_container_noanom.AutoProcScalingStatistics.append(stats)
 
-        outer_stats = AutoProcScalingStatistics()
-        for k, v in outer.iteritems():
-            setattr(outer_stats, k, v)
-        scaling_container_noanom.AutoProcScalingStatistics.append(outer_stats)
+        stats = _create_scaling_stats(outer_stats_noanom, 'outerShell',
+                                      prev_res, False)
+        overall_high = stats.resolutionLimitHigh
+        scaling_container_noanom.AutoProcScalingStatistics.append(stats)
+        stats = _create_scaling_stats(total_stats_noanom, 'overall',
+                                      self.low_resolution_limit, False)
+        stats.resolutionLimitLow = overall_low
+        stats.resolutionLimitHigh = overall_high
+        scaling_container_noanom.AutoProcScalingStatistics.append(stats)
 
-        overall_stats = AutoProcScalingStatistics()
-        for k, v in overall.iteritems():
-            setattr(overall_stats, k, v)
-        scaling_container_noanom.AutoProcScalingStatistics.append(overall_stats)
 
         integration_container_noanom = AutoProcIntegrationContainer()
         image = Image()
@@ -898,12 +979,14 @@ fi
         integration_noanom = AutoProcIntegration()
         if self.integration_id_noanom is not None:
             integration_noanom.autoProcIntegrationId = self.integration_id_noanom
-        integration_noanom.cell_a = unit_cell[0]
-        integration_noanom.cell_b = unit_cell[1]
-        integration_noanom.cell_c = unit_cell[2]
-        integration_noanom.cell_alpha = unit_cell[3]
-        integration_noanom.cell_beta = unit_cell[4]
-        integration_noanom.cell_gamma = unit_cell[5]
+
+        unit_cell = self.parse_xds_noanom.dataOutput.unit_cell_constants
+        integration_noanom.cell_a = unit_cell[0].value
+        integration_noanom.cell_b = unit_cell[1].value
+        integration_noanom.cell_c = unit_cell[2].value
+        integration_noanom.cell_alpha = unit_cell[3].value
+        integration_noanom.cell_beta = unit_cell[4].value
+        integration_noanom.cell_gamma = unit_cell[5].value
         integration_noanom.anomalous = 0
 
         # done with the integration
@@ -912,24 +995,6 @@ fi
 
         # ANOM PATH
         scaling_container_anom = AutoProcScalingContainer()
-
-        inner, outer, overall, unit_cell = _parse_aimless(self.file_conversion.dataOutput.aimless_log_anom.value)
-        inner_stats = AutoProcScalingStatistics()
-        for k, v in inner.iteritems():
-            setattr(inner_stats, k, v)
-        scaling_container_anom.AutoProcScalingStatistics.append(inner_stats)
-
-        outer_stats = AutoProcScalingStatistics()
-        for k, v in outer.iteritems():
-            setattr(outer_stats, k, v)
-        scaling_container_anom.AutoProcScalingStatistics.append(outer_stats)
-
-        overall_stats = AutoProcScalingStatistics()
-        for k, v in overall.iteritems():
-            setattr(overall_stats, k, v)
-        scaling_container_anom.AutoProcScalingStatistics.append(overall_stats)
-
-
 
         scaling = AutoProcScaling()
         scaling.recordTimeStamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -973,12 +1038,16 @@ fi
         crystal_stats =  self.parse_xds_anom.dataOutput
         if self.integration_id_anom is not None:
             integration_anom.autoProcIntegrationId = self.integration_id_anom
-        integration_anom.cell_a = unit_cell[0]
-        integration_anom.cell_b = unit_cell[1]
-        integration_anom.cell_c = unit_cell[2]
-        integration_anom.cell_alpha = unit_cell[3]
-        integration_anom.cell_beta = unit_cell[4]
-        integration_anom.cell_gamma = unit_cell[5]
+
+        # Get the unit cell from XDS generation
+        unit_cell = self.parse_xds_anom.dataOutput.unit_cell_constants
+
+        integration_anom.cell_a = unit_cell[0].value
+        integration_anom.cell_b = unit_cell[1].value
+        integration_anom.cell_c = unit_cell[2].value
+        integration_anom.cell_alpha = unit_cell[3].value
+        integration_anom.cell_beta = unit_cell[4].value
+        integration_anom.cell_gamma = unit_cell[5].value
         integration_anom.anomalous = 1
 
         # done with the integration
@@ -996,30 +1065,15 @@ fi
         # now for the generated files. There's some magic to do with
         # their paths to determine where to put them on pyarch
         pyarch_path = None
-        # Note: the path is in the form /data/whatever
 
+        # Note: the path is in the form /data/whatever
         # remove the edna-autoproc-import suffix
-        original_files_dir = self.file_conversion.dataInput.output_directory.value
-        #files_dir, _ = os.path.split(original_files_dir)
+        original_files_dir = self.results_dir
+
         files_dir = original_files_dir
 
-        # the whole transformation is fragile!
-        if files_dir.startswith('/data/visitor'):
-            # We might get empty elements at the head/tail of the list
-            tokens = [elem for elem in files_dir.split(os.path.sep)
-                      if len(elem) > 0]
-            pyarch_path = os.path.join('/data/pyarch',
-                                       tokens[3], tokens[2],
-                                       *tokens[4:])
-        else:
-            # We might get empty elements at the head/tail of the list
-            tokens = [elem for elem in files_dir.split(os.path.sep)
-                      if len(elem) > 0]
-            if tokens[2] == 'inhouse':
-                pyarch_path = os.path.join('/data/pyarch', tokens[1],
-                                           *tokens[3:])
+        pyarch_path = to_pyarch_path(files_dir)
         if pyarch_path is not None:
-            pyarch_path = pyarch_path.replace('PROCESSED_DATA', 'RAW_DATA')
             try:
                 os.makedirs(pyarch_path)
             except OSError:
@@ -1034,6 +1088,8 @@ fi
                     continue
                 if not os.path.splitext(current)[1].lower() in ISPYB_UPLOAD_EXTENSIONS:
                     continue
+                # Store the filename so we don't reupload it later on
+                self.uploaded_files.append(current)
                 new_path = os.path.join(pyarch_path, f)
                 file_list.append(new_path)
                 shutil.copyfile(current,
@@ -1047,20 +1103,15 @@ fi
                 attach.filePath = dirname
                 program_container.AutoProcProgramAttachment.append(attach)
 
-
         program_container.AutoProcProgram.processingStatus = True
         output.AutoProcProgramContainer = program_container
 
         # first with anom
-
         output.AutoProcScalingContainer = scaling_container_anom
 
         ispyb_input = XSDataInputStoreAutoProc()
         ispyb_input.AutoProcContainer = output
 
-
-        with open(self.dataInput.output_file.path.value, 'w') as f:
-            f.write(ispyb_input.marshal())
 
         # store results in ispyb
         self.store_autoproc_anom.dataInput = ispyb_input
@@ -1077,16 +1128,13 @@ fi
             # store the autoproc ID as a filename in the
             # fastproc_integration_ids directory
             os.mknod(os.path.join(self.autoproc_ids_dir, str(self.integration_id_anom)), 0755)
-        # then noanom stats
 
+        # then noanom stats
         output.AutoProcScalingContainer = scaling_container_noanom
 
         ispyb_input = XSDataInputStoreAutoProc()
         ispyb_input.AutoProcContainer = output
 
-
-        with open(self.dataInput.output_file.path.value, 'w') as f:
-            f.write(ispyb_input.marshal())
 
         # store results in ispyb
         self.store_autoproc_noanom.dataInput = ispyb_input
@@ -1103,6 +1151,43 @@ fi
             # store the autoproc id
             os.mknod(os.path.join(self.autoproc_ids_dir, str(self.integration_id_noanom)), 0755)
 
+def ispyb_attach_files(program_id, files, ispyb_user, ispyb_password):
+    """files is a list of tuples: (filename, filepath, filetype)"""
+    c = suds.client.Client(AUTOPROC_WS_URL, username=ispyb_user, password=ispyb_password)
+    timestamp = DateTime(datetime.datetime.now())
+    for (filename, filepath, filetype) in files:
+        attach_id = c.service.storeOrUpdateAutoProcProgramAttachment(
+            arg0=None,
+            fileType=filetype,
+            fileName=filename,
+            filePath=filepath,
+            recordTimeStamp=timestamp,
+            autoProcProgramId=program_id)
+    EDVerbose.DEBUG('attached file {0}, attachement id {1}'.format(filename, attach_id))
+
+
+def update_autoproc(ispyb_user, ispyb_password,
+                    autoproc_id,
+                    autoproc_program_id,
+                    spacegroup,
+                    cell_a, cell_b, cell_c,
+                    cell_alpha, cell_beta, cell_gamma):
+    """update the autoprocessing cell dimensions and spacegroup with
+values from both pointless and aimless"""
+    c = suds.client.Client(AUTOPROC_WS_URL, username=ispyb_user, password=ispyb_password)
+    timestamp = DateTime(datetime.datetime.now())
+    c.service.storeOrUpdateAutoProc(arg0=autoproc_id, autoProcProgramId=autoproc_program_id,
+                                    spaceGroup=spacegroup,
+                                    refinedCell_a=cell_a,
+                                    refinedCell_b=cell_b,
+                                    refinedCell_c=cell_c,
+                                    refinedCell_alpha=cell_alpha,
+                                    refinedCell_beta=cell_beta,
+                                    refinedCell_gamma=cell_gamma)
+
+
+
+
 # Proxy since the API changed and we can now log to several ids
 def log_to_ispyb(integration_id, step, status, comments=""):
     if type(integration_id) is list:
@@ -1110,6 +1195,27 @@ def log_to_ispyb(integration_id, step, status, comments=""):
             log_to_ispyb_impl(item, step, status, comments)
     else:
         log_to_ispyb_impl(integration_id, step, status, comments)
+
+def to_pyarch_path(path):
+    # Convert a path to its equivalent on pyarch. The whole
+    # transformation is fragile!
+    if path.startswith('/data/visitor'):
+        # We might get empty elements at the head/tail of the list
+        tokens = [elem for elem in path.split(os.path.sep)
+                  if len(elem) > 0]
+        pyarch_path = os.path.join('/data/pyarch',
+                                   tokens[3], tokens[2],
+                                   *tokens[4:])
+    else:
+        # We might get empty elements at the head/tail of the list
+        tokens = [elem for elem in path.split(os.path.sep)
+                  if len(elem) > 0]
+        if tokens[2] == 'inhouse':
+            pyarch_path = os.path.join('/data/pyarch', tokens[1],
+                                       *tokens[3:])
+    pyarch_path = pyarch_path.replace('PROCESSED_DATA', 'RAW_DATA')
+    return pyarch_path
+
 
 def log_to_ispyb_impl(integration_id, step, status, comments=""):
     # hack in the event we could not create an integration ID
