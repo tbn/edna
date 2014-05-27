@@ -98,9 +98,6 @@ from XSDataISPyBv1_4 import  XSDataInputStoreAutoProcStatus
 
 from xdscfgparser import parse_xds_file, dump_xds_file
 
-import autoproclog
-autoproclog.LOG_SERVER='rnice655:5000'
-
 WAIT_FOR_FRAME_TIMEOUT=240 #max uses 50*5
 
 # We used to go through the results directory and add all files to the
@@ -161,15 +158,6 @@ class EDPluginControlAutoproc(EDPluginControl):
             self.DEBUG('system load avg: {0}'.format(os.getloadavg()))
         except OSError:
             pass
-
-        # for info to send to the autoproc stats server
-        self.custom_stats = dict(creation_time=time.time(),
-                                 processing_type='edna fastproc',
-                                 datacollect_id=self.dataInput.data_collection_id.value,
-                                 comments='running on {0}'.format(socket.gethostname()))
-
-
-
 
         data_in = self.dataInput
 
@@ -351,7 +339,6 @@ class EDPluginControlAutoproc(EDPluginControl):
         self.stats['first_xds'] = time.time()-t0
         with open(self.log_file_path, 'w') as f:
             json.dump(self.stats, f)
-        self.custom_stats['xds_runtime']=self.stats['first_xds']
 
         log_to_ispyb([self.integration_id_noanom, self.integration_id_anom],
                      'Indexing', 'Launched', 'first xds run')
@@ -410,15 +397,6 @@ class EDPluginControlAutoproc(EDPluginControl):
         EDVerbose.screen('STARTING first resolution cutoff')
         t0=time.time()
         xdsresult = self.xds_first.dataOutput
-
-        # for the custom stats
-        self.custom_stats['overall_i_over_sigma']=xdsresult.total_completeness.isig.value
-        self.custom_stats['overall_r_value']=xdsresult.total_completeness.rfactor.value
-        self.custom_stats['inner_i_over_sigma']=xdsresult.completeness_entries[0].isig.value
-        self.custom_stats['inner_r_value']=xdsresult.completeness_entries[0].rfactor.value
-        self.custom_stats['i_over_sigma']=xdsresult.completeness_entries[-1].isig.value
-        self.custom_stats['r_value']=xdsresult.completeness_entries[-1].rfactor.value
-
 
         res_cutoff_in = XSDataResCutoff()
         res_cutoff_in.xds_res = xdsresult
@@ -716,14 +694,6 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         if self.file_conversion.isFailure():
             EDVerbose.ERROR("file import failed")
-
-
-        self.custom_stats['total_time']=time.time() - process_start
-        try:
-            autoproclog.log(**self.custom_stats)
-        except Exception, e:
-            EDVerbose.screen('could not logs stats to custom log server')
-            EDVerbose.screen(traceback.format_exc())
 
 
         # Now onto DIMPLE
