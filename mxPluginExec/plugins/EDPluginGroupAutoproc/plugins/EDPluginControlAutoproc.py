@@ -732,7 +732,7 @@ fi
             EDVerbose.WARNING('No pdb file found, not running dimple')
         else:
             EDVerbose.screen('Using pdb file {0}'.format(pdb_file))
-            dimple_in = XSDataDimpleIn
+            dimple_in = XSDataDimpleIn()
             dimple_in.input_pdb = XSDataString(pdb_file)
 
             # We'll put the results in the results directory as well
