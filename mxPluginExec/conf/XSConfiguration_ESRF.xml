@@ -605,6 +605,32 @@
 
     <!-- Things for DIMPLE -->
    <XSPluginItem>
+      <name>EDPluginExecDimple</name>
+      <XSParamList>
+         <XSParamItem>
+            <name>execProcessScriptShell</name>
+            <value>/bin/bash</value>
+         </XSParamItem>
+         <XSParamItem>
+            <name>execProcessScriptExecutable</name>
+            <value>${CCP4}/bin/dimple</value>
+         </XSParamItem>
+         <XSParamItem>
+            <name>execProcessScriptVersionString</name>
+            <value/>
+         </XSParamItem>
+         <XSParamItem>
+            <name>execProcessScriptSetupCCP4</name>
+            <value>${CCP4}/bin/ccp4.setup-sh</value>
+         </XSParamItem>
+         <XSParamItem>
+            <name>execProcessTimeOut</name>
+            <value>20000</value>
+         </XSParamItem>
+      </XSParamList>
+   </XSPluginItem>
+
+   <XSPluginItem>
       <name>EDPluginExecDIMPLEMTZDUMPv10</name>
       <XSParamList>
          <XSParamItem>

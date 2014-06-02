@@ -299,7 +299,7 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         self.file_conversion = self.loadPlugin('EDPluginControlAutoprocImport')
 
-        self.dimple = self.loadPlugin('EDPluginExecDimple.py')
+        self.dimple = self.loadPlugin('EDPluginExecDimple')
 
         self.DEBUG('EDPluginControlAutoproc.preProcess finished')
 
