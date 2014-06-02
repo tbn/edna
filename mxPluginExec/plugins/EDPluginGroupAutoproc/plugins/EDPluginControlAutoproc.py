@@ -74,14 +74,7 @@ from XSDataISPyBv1_4 import XSDataInputStoreAutoProc
 from XSDataISPyBv1_4 import XSDataResultStoreAutoProc
 
 # dimple stuff
-
-# this depends on the CCTBX modules so perhaps we could make running
-# dimple dependent on whether those are installed or not
-edFactoryPlugin.loadModule('XSDataCCP4DIMPLE')
-from XSDataCCP4DIMPLE import CCP4DataInputControlPipelineCalcDiffMap
-from XSDataCCP4DIMPLE import HKL, XYZ, CCP4MTZColLabels, CCP4LogFile
-
-edFactoryPlugin.loadModule('EDPluginControlDIMPLEPipelineCalcDiffMapv10.py')
+from XSDataAutoproc import XSDataDimpleIn
 
 # what actually goes inside
 from XSDataISPyBv1_4 import AutoProcContainer, AutoProc, AutoProcScalingContainer
@@ -306,7 +299,7 @@ class EDPluginControlAutoproc(EDPluginControl):
 
         self.file_conversion = self.loadPlugin('EDPluginControlAutoprocImport')
 
-        self.dimple = self.loadPlugin('EDPluginControlDIMPLEPipelineCalcDiffMapv10')
+        self.dimple = self.loadPlugin('EDPluginExecDimple.py')
 
         self.DEBUG('EDPluginControlAutoproc.preProcess finished')
 
@@ -739,19 +732,14 @@ fi
             EDVerbose.WARNING('No pdb file found, not running dimple')
         else:
             EDVerbose.screen('Using pdb file {0}'.format(pdb_file))
-            dimple_in = CCP4DataInputControlPipelineCalcDiffMap()
-            dimple_in.XYZIN = XYZ(path=XSDataString(pdb_file))
+            dimple_in = XSDataDimpleIn
+            dimple_in.input_pdb = XSDataString(pdb_file)
 
             # We'll put the results in the results directory as well
 
-            dimple_in.XYZOUT = XYZ(path=XSDataString(dimple_out))
+            dimple_in.output_pdb = XSDataString(dimple_out)
 
-            labels = CCP4MTZColLabels()
-            labels.F = XSDataString('F_xdsproc')
-            labels.SIGF = XSDataString('SIGF_xdsproc')
-            labels.IMEAN = XSDataString('IMEAN')
-            labels.SIGIMEAN = XSDataString('SIGIMEAN')
-            dimple_in.ColLabels = labels
+            dimple_in.icol = XSDataString('IMEAN')
 
             # For now the import plugin does no give information about
             # the paths to the various files it generates so we look
@@ -766,10 +754,8 @@ fi
             if mtz_file is None:
                 EDVerbose.ERROR('No suitable input mtz found for dimple, not running it')
             else:
-                dimple_in.HKLIN = HKL(path=XSDataString(mtz_file))
-                dimple_log = os.path.join(self.results_dir, '{0}_dimple.log'.format(self.image_prefix))
-                dimple_in.outputLogFile = CCP4LogFile(path=XSDataString(dimple_log))
-                dimple_in.HKLOUT = HKL(path=XSDataString(dimple_mtzout))
+                dimple_in.input_mtz = XSDataString(mtz_file)
+                dimple_output_mtz = XSDataString(dimple_mtzout)
                 self.dimple.dataInput = dimple_in
                 self.dimple.executeSynchronous()
                 if not self.dimple.isFailure():
