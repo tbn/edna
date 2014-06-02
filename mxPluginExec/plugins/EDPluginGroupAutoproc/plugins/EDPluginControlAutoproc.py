@@ -741,6 +741,8 @@ fi
 
             dimple_in.icol = XSDataString('IMEAN')
 
+            dimple_in.output_dir = XSDataString(os.path.join(self.results_dir, 'dimple'))
+
             # For now the import plugin does no give information about
             # the paths to the various files it generates so we look
             # into the results directory for the right mtz file
