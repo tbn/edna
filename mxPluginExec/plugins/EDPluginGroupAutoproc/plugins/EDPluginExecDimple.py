@@ -119,7 +119,7 @@ class EDPluginExecDimple(EDPluginExecProcessScript):
 
         cmdline = '{0} {1}'.format(' '.join(additional_opts),
                                           self.basic_options)
-        self.setScripCommandline(cmdline)
+        self.setScriptCommandline(cmdline)
         self.DEBUG('set the command line options to {0}'.format(cmdline))
 
     def process(self, _edObject = None):
