@@ -741,7 +741,12 @@ fi
 
             dimple_in.icol = XSDataString('IMEAN')
 
-            dimple_in.output_dir = XSDataString(os.path.join(self.results_dir, 'dimple'))
+            dimple_output_dir = os.path.join(self.results_dir, 'dimple')
+            try:
+                os.makedirs(dimple_output_dir) # ensure it exists
+            except OSError:
+                EDVerbose.DEBUG('dimple output directory already exists.')
+            dimple_in.output_dir = XSDataString(dimple_output_dir)
 
             # For now the import plugin does no give information about
             # the paths to the various files it generates so we look
